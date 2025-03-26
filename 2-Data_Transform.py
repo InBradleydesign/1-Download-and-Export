@@ -3,7 +3,7 @@ import pandas as pd
 import os
 
 # Caminho do PDF
-pdf_path = "Anexo_1.pdf"
+pdf_path = r"C:\Users\bradl\OneDrive\Área de Trabalho\2-Teste de nivelamento Estagio\Processos Divididos\1-Download-and-Export\1-Download-and-Export\Teste-Download\Anexo_I_Rol_2021RN_465.2021_RN627L.2024.pdf"
 csv_output = "Teste_Bradley.csv"
 
 # Tentando extrair tabelas com melhor detecção
