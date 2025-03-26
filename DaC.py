@@ -9,7 +9,7 @@ from time import sleep
 chrome_options = webdriver.ChromeOptions()
 
 # Diretorio de Download
-download_dir = r"C:\Users\bradl\OneDrive\Área de Trabalho\2-Teste de nivelamento Estagio\Processos Divididos\1-Download-and-Export\1-Download-and-Export\Teste-Download"
+download_dir = r"C:\\Users\\bradl\\OneDrive\\Área de Trabalho\\2-Teste de nivelamento Estagio\\Processos Divididos\\1-Download-and-Export\\1-Download-and-Export\\Teste-Download"
 
 zip_file = os.path.join(download_dir, 'arquivos_comprimidos.zip')
 
