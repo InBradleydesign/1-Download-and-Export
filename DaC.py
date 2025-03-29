@@ -27,7 +27,7 @@ def criar_zip(arquivos, nome_zip):
     try:
         with zipfile.ZipFile(nome_zip, 'w', zipfile.ZIP_DEFLATED) as zipf:
             for arquivo in arquivos:
-                zipf.write(arquivo, os.path.basename(arquivo))  # Adiciona o arquivo ao ZIP com o nome original
+                zipf.write(arquivo, os.path.basename(arquivo))
         print(f'Arquivo {nome_zip} criado com sucesso.')
     except Exception as e:
         print(f"Erro ao criar o arquivo ZIP: {e}")
@@ -42,10 +42,10 @@ def obter_arquivos_download():
 def aguardar_download():
     while True:
         arquivos_baixados = obter_arquivos_download()
-        if len(arquivos_baixados) >= 2:  # Verifica se 2 arquivos PDF foram baixados
-            return arquivos_baixados
+        if len(arquivos_baixados) >= 2:
+            return arquivos_baixados  # Correção aplicada aqui
         print(f"Aguardando arquivos: {len(arquivos_baixados)} arquivos baixados.")
-        sleep(1)  # Delay para evitar loop rápido
+        sleep(1)
 
 # Função para excluir arquivos PDF no diretório de download
 def excluir_arquivos(arquivos):
@@ -63,23 +63,24 @@ def minimizar_aba_data(navegador):
             print("Aba 'data:' minimizada.")
             break
 
-# Iniciar o navegador com as opções configuradas
 navegador = webdriver.Chrome(options=chrome_options)
 
-# Minimizar a janela do navegador
 navegador.minimize_window()
 
-# Verifica se já existem arquivos PDF no diretório de download
 arquivos_baixados = obter_arquivos_download()
 
 if len(arquivos_baixados) >= 2:
-    print("Foi detectada a presença de dois PDFs pré-existentes.")
-    escolha = input("Deseja remover os arquivos ou mantê-los?\n[1] - Remover\n[2] - Manter\nEscolha: ")
+    print(''' Foi detectada a presença de dois PDFs pré-existentes.
+    [1] - Remover arquivos
+    [2] - Manter arquivos ''')
 
-    if escolha == '1':  # Remover arquivos
+    escolha = str(input('Opção:'))
+
+    if escolha == '1':
         excluir_arquivos(arquivos_baixados)
-        arquivos_baixados = []  # Resetar a lista para novos downloads
-    elif escolha == '2':  # Manter arquivos
+        arquivos_baixados = []
+
+    elif escolha == '2':
         if os.path.exists(zip_file):
             print(f"O arquivo ZIP '{zip_file}' já existe. Processo finalizado.")
             navegador.quit()
@@ -89,14 +90,12 @@ if len(arquivos_baixados) >= 2:
             navegador.quit()
             exit()
     else:
-        print("Opção inválida. O processo será finalizado.")
+        print("Opção inválida. Finalizando o processo.")
         navegador.quit()
         exit()
 
-# Caso não haja arquivos ou o usuário optou por remover, continuar o download
 navegador.get('https://www.gov.br/ans/pt-br/acesso-a-informacao/participacao-da-sociedade/atualizacao-do-rol-de-procedimentos')
 
-# Aceitação de cookies
 try:
     aceito_cookies = WebDriverWait(navegador, 10).until(
         EC.element_to_be_clickable((By.XPATH, '/html/body/div[5]/div/div/div/div/div[2]/button[3]'))
@@ -108,13 +107,11 @@ except Exception as e:
 
 sleep(2)
 
-# Primeiro arquivo pelo XPath
 navegador.find_element(By.XPATH, '//*[@id="cfec435d-6921-461f-b85a-b425bc3cb4a5"]/div/ol/li[1]/a[1]').click()
 print("Primeiro arquivo baixando.")
 
-sleep(5)  # Espera inicial para iniciar o download
+sleep(5)
 
-# Segundo arquivo pelo XPath
 try:
     segundo_arquivo = WebDriverWait(navegador, 10).until(
         EC.element_to_be_clickable((By.XPATH, '//*[@id="cfec435d-6921-461f-b85a-b425bc3cb4a5"]/div/ol/li[2]/a'))
@@ -124,17 +121,13 @@ try:
 except Exception as e:
     print(f"Erro ao tentar baixar o segundo arquivo: {e}")
 
-# Aguarda até que os arquivos sejam baixados
 arquivos_baixados = aguardar_download()
 
-# Verifica se os arquivos foram encontrados
 if len(arquivos_baixados) >= 2:
     criar_zip(arquivos_baixados[:2], zip_file)
 else:
     print("Os arquivos para compressão não foram encontrados.")
 
-# Minimiza a aba "data:" caso tenha sido aberta
 minimizar_aba_data(navegador)
 
-# Fecha o navegador
 navegador.quit()
