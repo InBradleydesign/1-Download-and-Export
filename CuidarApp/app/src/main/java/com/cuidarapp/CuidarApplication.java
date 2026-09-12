@@ -2,6 +2,7 @@ package com.cuidarapp;
 
 import android.app.Application;
 
+import com.cuidarapp.BuildConfig;
 import com.cuidarapp.data.AppDatabase;
 import com.cuidarapp.repository.*;
 import com.cuidarapp.service.*;
