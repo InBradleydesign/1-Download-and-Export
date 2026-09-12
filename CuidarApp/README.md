@@ -164,3 +164,4 @@ testImplementation 'org.mockito:mockito-core:5.8.0'
 ## Licença
 
 Este projeto é um protótipo educacional. Não substitui serviços de emergência reais ou acompanhamento médico profissional.
+
