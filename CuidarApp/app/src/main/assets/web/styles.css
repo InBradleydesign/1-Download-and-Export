@@ -1858,3 +1858,557 @@ html, body {
         min-height: -webkit-fill-available;
     }
 }
+
+/* ==================== CARDS DE CATEGORIA COM PROGRESSO (Inspirado na referência) ==================== */
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
+    margin: var(--spacing-md) 0;
+}
+
+.category-card {
+    background: var(--color-surface);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    box-shadow: var(--shadow-card);
+    transition: all var(--transition-normal);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.category-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-card-hover);
+}
+
+.category-card.cat-medication {
+    background: linear-gradient(135deg, #E8F4FC 0%, #D6EBF7 100%);
+}
+
+.category-card.cat-fitness {
+    background: linear-gradient(135deg, #E6F4ED 0%, #D4EBE1 100%);
+}
+
+.category-card.cat-food {
+    background: linear-gradient(135deg, #FEF7E6 0%, #FCF0D4 100%);
+}
+
+.category-card.cat-social {
+    background: linear-gradient(135deg, #EDE9FE 0%, #E0D9FD 100%);
+}
+
+/* Círculo de progresso */
+.progress-circle {
+    width: 80px;
+    height: 80px;
+    position: relative;
+    margin-bottom: var(--spacing-sm);
+}
+
+body.idoso-view .progress-circle {
+    width: 90px;
+    height: 90px;
+}
+
+.progress-circle svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.progress-circle-bg {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.6);
+    stroke-width: 6;
+}
+
+.progress-circle-fill {
+    fill: none;
+    stroke-width: 6;
+    stroke-linecap: round;
+    transition: stroke-dashoffset var(--transition-slow);
+}
+
+.category-card.cat-medication .progress-circle-fill { stroke: var(--color-primary); }
+.category-card.cat-fitness .progress-circle-fill { stroke: var(--color-success); }
+.category-card.cat-food .progress-circle-fill { stroke: var(--color-warning); }
+.category-card.cat-social .progress-circle-fill { stroke: #7C3AED; }
+
+.progress-circle-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 32px;
+    height: 32px;
+}
+
+body.idoso-view .progress-circle-icon {
+    width: 38px;
+    height: 38px;
+}
+
+.category-card.cat-medication .progress-circle-icon { color: var(--color-primary); }
+.category-card.cat-fitness .progress-circle-icon { color: var(--color-success); }
+.category-card.cat-food .progress-circle-icon { color: var(--color-warning); }
+.category-card.cat-social .progress-circle-icon { color: #7C3AED; }
+
+.progress-percentage {
+    font-size: calc(var(--font-base) * 0.85);
+    font-weight: 700;
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    background: var(--color-surface);
+    padding: 2px 6px;
+    border-radius: var(--radius-full);
+    box-shadow: var(--shadow-sm);
+}
+
+.category-card-title {
+    font-weight: 700;
+    font-size: calc(var(--font-base) * 1.05);
+    margin-bottom: 4px;
+    color: var(--color-text);
+}
+
+.category-card-count {
+    font-size: var(--font-small);
+    color: var(--color-text-secondary);
+}
+
+/* ==================== CARD DE LEMBRETE/ALERTA (Inspirado na referência) ==================== */
+.reminder-card {
+    background: linear-gradient(135deg, #43C6C8 0%, #2D9CDB 100%);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-lg);
+    color: white;
+    margin-bottom: var(--spacing-md);
+    position: relative;
+    overflow: hidden;
+}
+
+.reminder-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -30%;
+    width: 200px;
+    height: 200px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+}
+
+.reminder-card-greeting {
+    font-size: calc(var(--font-base) * 1.4);
+    font-weight: 700;
+    margin-bottom: var(--spacing-xs);
+}
+
+body.idoso-view .reminder-card-greeting {
+    font-size: calc(var(--font-base-idoso) * 1.4);
+}
+
+.reminder-card-message {
+    font-size: var(--font-base);
+    opacity: 0.95;
+    margin-bottom: var(--spacing-sm);
+}
+
+.reminder-card-detail {
+    font-size: var(--font-small);
+    opacity: 0.85;
+    margin-bottom: var(--spacing-md);
+}
+
+.reminder-card-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+}
+
+.reminder-btn {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-full);
+    font-weight: 600;
+    font-size: var(--font-base);
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.reminder-btn-primary {
+    background: white;
+    color: var(--color-primary);
+}
+
+.reminder-btn-primary:hover {
+    background: #F0F0F0;
+    transform: scale(1.02);
+}
+
+.reminder-btn-secondary {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.reminder-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* ==================== PERGUNTA INTERATIVA (Inspirado na referência) ==================== */
+.question-card {
+    background: var(--color-surface);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-md);
+    box-shadow: var(--shadow-card);
+    text-align: center;
+}
+
+.question-text {
+    font-size: calc(var(--font-base) * 1.1);
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: var(--spacing-md);
+}
+
+body.idoso-view .question-text {
+    font-size: calc(var(--font-base-idoso) * 1.1);
+}
+
+.question-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    justify-content: center;
+}
+
+.question-btn {
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-radius: var(--radius-full);
+    font-weight: 600;
+    font-size: var(--font-base);
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    min-height: var(--touch-target);
+}
+
+body.idoso-view .question-btn {
+    min-height: var(--touch-target-idoso);
+    padding: var(--spacing-md) var(--spacing-lg);
+}
+
+.question-btn-yes {
+    background: var(--color-success);
+    color: white;
+}
+
+.question-btn-yes:hover {
+    background: #2F855A;
+    transform: scale(1.02);
+}
+
+.question-btn-no {
+    background: var(--color-surface);
+    color: var(--color-text-secondary);
+    border-color: var(--color-border);
+}
+
+.question-btn-no:hover {
+    border-color: var(--color-text-secondary);
+    background: var(--color-bg);
+}
+
+/* ==================== LISTA DE TAREFAS COM TIMELINE (Inspirado na referência) ==================== */
+.tasks-section {
+    margin-top: var(--spacing-lg);
+}
+
+.tasks-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.tasks-title {
+    font-size: calc(var(--font-base) * 1.15);
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.tasks-counter {
+    font-size: var(--font-small);
+    color: var(--color-text-secondary);
+}
+
+.task-list {
+    position: relative;
+}
+
+.task-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md) 0;
+    position: relative;
+}
+
+.task-item:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 23px;
+    top: 56px;
+    bottom: -8px;
+    width: 2px;
+    background: var(--color-divider);
+}
+
+body.idoso-view .task-item:not(:last-child)::before {
+    left: 27px;
+}
+
+.task-time {
+    min-width: 70px;
+    text-align: right;
+    padding-right: var(--spacing-sm);
+}
+
+.task-time-value {
+    font-weight: 600;
+    font-size: var(--font-base);
+    color: var(--color-text);
+}
+
+.task-time-period {
+    font-size: var(--font-small);
+    color: var(--color-text-secondary);
+}
+
+.task-indicator {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-primary-light);
+    border: 3px solid var(--color-primary);
+    z-index: 1;
+    transition: all var(--transition-fast);
+    cursor: pointer;
+}
+
+body.idoso-view .task-indicator {
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+}
+
+.task-indicator svg {
+    width: 20px;
+    height: 20px;
+    color: var(--color-primary);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+body.idoso-view .task-indicator svg {
+    width: 24px;
+    height: 24px;
+}
+
+.task-item.completed .task-indicator {
+    background: var(--color-success);
+    border-color: var(--color-success);
+}
+
+.task-item.completed .task-indicator svg {
+    color: white;
+    opacity: 1;
+}
+
+.task-item.pending .task-indicator {
+    background: var(--color-surface);
+    border-color: var(--color-border);
+}
+
+.task-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.task-name {
+    font-weight: 600;
+    font-size: var(--font-base);
+    color: var(--color-text);
+    margin-bottom: 2px;
+}
+
+.task-item.completed .task-name {
+    text-decoration: line-through;
+    color: var(--color-text-secondary);
+}
+
+.task-detail {
+    font-size: var(--font-small);
+    color: var(--color-text-secondary);
+}
+
+.task-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    font-size: calc(var(--font-small) * 0.9);
+    font-weight: 500;
+    margin-top: var(--spacing-xs);
+}
+
+.task-badge-progress {
+    background: var(--color-primary-light);
+    color: var(--color-primary);
+}
+
+.task-badge-schedule {
+    background: var(--color-bg);
+    color: var(--color-text-secondary);
+}
+
+/* ==================== CARD DE SAÚDE/REPORT ==================== */
+.health-card {
+    background: var(--color-surface);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-md);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    box-shadow: var(--shadow-sm);
+    border-left: 4px solid var(--color-success);
+}
+
+.health-card-icon {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    border-radius: var(--radius-lg);
+    background: var(--color-success-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.health-card-icon svg {
+    width: 24px;
+    height: 24px;
+    color: var(--color-success);
+}
+
+.health-card-content {
+    flex: 1;
+}
+
+.health-card-title {
+    font-weight: 600;
+    font-size: var(--font-base);
+    color: var(--color-text);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.health-card-title svg {
+    width: 16px;
+    height: 16px;
+    color: var(--color-error);
+}
+
+.health-card-text {
+    font-size: var(--font-small);
+    color: var(--color-text-secondary);
+    margin: 0;
+}
+
+.health-card-arrow {
+    color: var(--color-text-muted);
+}
+
+.health-card-arrow svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* ==================== PERFIL DO USUÁRIO ==================== */
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-lg);
+    background: var(--color-surface);
+    border-radius: var(--radius-xl);
+    margin-bottom: var(--spacing-md);
+    box-shadow: var(--shadow-card);
+}
+
+.profile-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: var(--radius-full);
+    background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-turquoise-light) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid var(--color-primary);
+}
+
+.profile-avatar svg {
+    width: 36px;
+    height: 36px;
+    color: var(--color-primary);
+}
+
+.profile-info h2 {
+    font-size: calc(var(--font-base) * 1.2);
+    font-weight: 700;
+    margin: 0 0 4px;
+}
+
+.profile-info p {
+    font-size: var(--font-small);
+    color: var(--color-text-secondary);
+    margin: 0;
+}
+
+/* ==================== ANIMAÇÃO DE PULSO PARA BOTÕES IMPORTANTES ==================== */
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 10px rgba(231, 76, 60, 0);
+    }
+}
+
+.btn-emergency, .menu-card.emergency {
+    animation: pulse 2s infinite;
+}
+
+.btn-emergency:hover, .menu-card.emergency:hover {
+    animation: none;
+}

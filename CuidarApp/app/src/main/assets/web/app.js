@@ -178,16 +178,70 @@ function updateWelcomeSummary() {
     const medsResult = callBridge('getMedicamentos', App.usuario.id);
     const exResult = callBridge('getExercicios', App.usuario.id);
     
-    const medsCount = medsResult.success && medsResult.data ? medsResult.data.length : 0;
-    const exCount = exResult.success && exResult.data ? exResult.data.length : 0;
+    const meds = medsResult.success && medsResult.data ? medsResult.data : [];
+    const exercises = exResult.success && exResult.data ? exResult.data : [];
     
-    const summaryMeds = document.getElementById('summary-meds');
-    const summaryEx = document.getElementById('summary-exercises');
+    let medsConfirmed = 0;
+    let exercisesCompleted = 0;
     
-    if (summaryMeds) summaryMeds.textContent = `${medsCount} medicamento${medsCount !== 1 ? 's' : ''}`;
-    if (summaryEx) summaryEx.textContent = `${exCount} exercício${exCount !== 1 ? 's' : ''}`;
+    meds.forEach(med => {
+        const confirmResult = callBridge('isMedicamentoConfirmadoHoje', App.usuario.id, med.id);
+        if (confirmResult.success && confirmResult.data) medsConfirmed++;
+    });
+    
+    exercises.forEach(ex => {
+        const completeResult = callBridge('isExercicioConcluidoHoje', App.usuario.id, ex.id);
+        if (completeResult.success && completeResult.data) exercisesCompleted++;
+    });
+    
+    const medsTotal = meds.length;
+    const exTotal = exercises.length;
+    
+    const medsPct = medsTotal > 0 ? Math.round((medsConfirmed / medsTotal) * 100) : 0;
+    const exPct = exTotal > 0 ? Math.round((exercisesCompleted / exTotal) * 100) : 0;
+    
+    updateProgressCircle('progress-meds', medsPct);
+    updateProgressCircle('progress-exercises', exPct);
+    
+    const medsCountEl = document.getElementById('meds-count');
+    const exCountEl = document.getElementById('exercises-count');
+    const medsPctEl = document.getElementById('progress-meds-pct');
+    const exPctEl = document.getElementById('progress-exercises-pct');
+    
+    if (medsCountEl) medsCountEl.textContent = `${medsConfirmed} de ${medsTotal}`;
+    if (exCountEl) exCountEl.textContent = `${exercisesCompleted} de ${exTotal}`;
+    if (medsPctEl) medsPctEl.textContent = `${medsPct}%`;
+    if (exPctEl) exPctEl.textContent = `${exPct}%`;
     
     updateGreeting();
+    updateReminderCard(medsTotal - medsConfirmed, exTotal - exercisesCompleted);
+}
+
+function updateProgressCircle(elementId, percentage) {
+    const circle = document.getElementById(elementId);
+    if (!circle) return;
+    
+    const circumference = 100;
+    const offset = circumference - (percentage / 100) * circumference;
+    circle.style.strokeDashoffset = offset;
+}
+
+function updateReminderCard(pendingMeds, pendingExercises) {
+    const reminderMessage = document.getElementById('reminder-message');
+    const reminderDetail = document.getElementById('reminder-detail');
+    
+    if (!reminderMessage || !reminderDetail) return;
+    
+    if (pendingMeds > 0) {
+        reminderMessage.textContent = `Você tem ${pendingMeds} medicamento${pendingMeds > 1 ? 's' : ''} pendente${pendingMeds > 1 ? 's' : ''}.`;
+        reminderDetail.textContent = 'Não esqueça de verificar seus horários!';
+    } else if (pendingExercises > 0) {
+        reminderMessage.textContent = `Que tal fazer seu exercício de hoje?`;
+        reminderDetail.textContent = `Você tem ${pendingExercises} exercício${pendingExercises > 1 ? 's' : ''} para fazer.`;
+    } else {
+        reminderMessage.textContent = 'Parabéns! Você está em dia!';
+        reminderDetail.textContent = 'Continue cuidando da sua saúde.';
+    }
 }
 
 function updateGreeting() {
@@ -966,6 +1020,25 @@ function initFormEditarIdoso() {
 // ==================== IDOSO ====================
 function initIdoso() {
     document.getElementById('btn-logout-idoso')?.addEventListener('click', logout);
+    
+    document.getElementById('btn-check-meds')?.addEventListener('click', () => {
+        showScreen('screen-medicamentos-idoso');
+        loadMedicamentosIdoso();
+    });
+    
+    document.getElementById('btn-remind-later')?.addEventListener('click', () => {
+        showToast('Vamos te lembrar mais tarde!', 'info');
+    });
+    
+    document.getElementById('btn-question-yes')?.addEventListener('click', () => {
+        showToast('Ótimo! Continue assim!', 'success');
+        document.getElementById('question-card').style.display = 'none';
+    });
+    
+    document.getElementById('btn-question-no')?.addEventListener('click', () => {
+        showScreen('screen-medicamentos-idoso');
+        loadMedicamentosIdoso();
+    });
     
     document.getElementById('btn-dieta-idoso')?.addEventListener('click', () => {
         showScreen('screen-dieta-idoso');
