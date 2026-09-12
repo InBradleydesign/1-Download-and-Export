@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <meta name="theme-color" content="#2196F3">
+    <meta name="theme-color" content="#2D9CDB">
     <title>CuidarApp</title>
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -24,50 +24,87 @@
     </div>
 
     <!-- ==================== TELA DE LOGIN ==================== -->
-    <div id="screen-login" class="screen active">
+    <div id="screen-login" class="screen active login-screen">
         <div class="login-container">
-            <div class="login-logo">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                </svg>
+            <div class="login-header">
+                <div class="login-logo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                    </svg>
+                </div>
+                <h1 class="login-title">CuidarApp</h1>
+                <p class="login-subtitle">Cuidado e carinho para quem você ama</p>
             </div>
-            <h1 class="login-title">CuidarApp</h1>
             
             <div id="login-profile-select" class="login-profiles">
                 <button type="button" class="profile-btn" data-profile="CUIDADOR" aria-pressed="false">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                        <circle cx="9" cy="7" r="4"/>
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                    </svg>
+                    <div class="profile-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                    </div>
                     <div class="profile-info">
                         <h3>Cuidador</h3>
-                        <p>Gerencie idosos sob seus cuidados</p>
+                        <p>Gerencie os cuidados e acompanhe informações dos idosos</p>
+                    </div>
+                    <div class="check-indicator">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true">
+                            <polyline points="20 6 9 17 4 12"/>
+                        </svg>
                     </div>
                 </button>
                 <button type="button" class="profile-btn" data-profile="IDOSO" aria-pressed="false">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                        <circle cx="12" cy="7" r="4"/>
-                    </svg>
+                    <div class="profile-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                    </div>
                     <div class="profile-info">
                         <h3>Idoso</h3>
-                        <p>Acesse suas informações de saúde</p>
+                        <p>Acesse seus medicamentos, atividades e informações de saúde</p>
+                    </div>
+                    <div class="check-indicator">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true">
+                            <polyline points="20 6 9 17 4 12"/>
+                        </svg>
                     </div>
                 </button>
             </div>
 
-            <form id="login-form" class="card" style="display: none;">
+            <form id="login-form" class="login-form" style="display: none;">
                 <div class="form-group">
                     <label for="login-email" class="form-label">E-mail</label>
-                    <input type="email" id="login-email" class="form-input" placeholder="seu@email.com" required autocomplete="email">
+                    <input type="email" id="login-email" class="form-input" placeholder="Digite seu e-mail" required autocomplete="email">
                 </div>
                 <div class="form-group">
                     <label for="login-senha" class="form-label">Senha</label>
-                    <input type="password" id="login-senha" class="form-input" placeholder="Sua senha" required autocomplete="current-password">
+                    <div class="password-wrapper">
+                        <input type="password" id="login-senha" class="form-input" placeholder="Digite sua senha" required autocomplete="current-password">
+                        <button type="button" class="password-toggle" aria-label="Mostrar senha">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="eye-icon">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="eye-off-icon" style="display:none;">
+                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                                <line x1="1" y1="1" x2="23" y2="23"/>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
-                <button type="submit" id="btn-login" class="btn btn-primary btn-block">Entrar</button>
+                <div id="login-error" class="form-error" style="display: none;"></div>
+                <button type="submit" id="btn-login" class="btn btn-primary btn-block">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                        <polyline points="10 17 15 12 10 7"/>
+                        <line x1="15" y1="12" x2="3" y2="12"/>
+                    </svg>
+                    Entrar
+                </button>
             </form>
         </div>
     </div>
@@ -78,11 +115,11 @@
             <h1 class="header-title">Painel do Cuidador</h1>
             <div class="header-actions">
                 <button type="button" class="btn-icon" id="btn-font-decrease" aria-label="Diminuir fonte">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12H3M8 8l-4 4 4 4"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/></svg>
                 </button>
-                <span id="font-scale-display" aria-live="polite">100%</span>
+                <span id="font-scale-display" class="font-scale-display" aria-live="polite">100%</span>
                 <button type="button" class="btn-icon" id="btn-font-increase" aria-label="Aumentar fonte">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M16 8l4 4-4 4"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
                 </button>
                 <button type="button" class="btn-icon" id="btn-logout-cuidador" aria-label="Sair">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -93,11 +130,11 @@
             <div class="card">
                 <h2 class="card-title">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                    Selecione um Idoso
+                    Idosos sob seus cuidados
                 </h2>
                 <div id="lista-idosos-cuidador"></div>
-                <button type="button" class="btn btn-primary btn-block" id="btn-cadastrar-idoso" style="margin-top: 16px;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <button type="button" class="btn btn-primary btn-block" id="btn-cadastrar-idoso" style="margin-top: var(--spacing-md);">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
                     Cadastrar Novo Idoso
                 </button>
             </div>
@@ -116,27 +153,38 @@
         <div class="container">
             <form id="form-cadastrar-idoso" class="card">
                 <div class="form-group">
-                    <label for="idoso-nome" class="form-label">Nome *</label>
-                    <input type="text" id="idoso-nome" class="form-input" required>
+                    <label for="idoso-nome" class="form-label">Nome completo *</label>
+                    <input type="text" id="idoso-nome" class="form-input" placeholder="Digite o nome" required>
                 </div>
                 <div class="form-group">
                     <label for="idoso-email" class="form-label">E-mail *</label>
-                    <input type="email" id="idoso-email" class="form-input" required>
+                    <input type="email" id="idoso-email" class="form-input" placeholder="email@exemplo.com" required>
                 </div>
                 <div class="form-group">
-                    <label for="idoso-senha" class="form-label">Senha *</label>
-                    <input type="password" id="idoso-senha" class="form-input" required minlength="6">
-                    <span class="form-hint">Mínimo 6 caracteres</span>
+                    <label for="idoso-senha" class="form-label">Senha de acesso *</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="idoso-senha" class="form-input" placeholder="Mínimo 6 caracteres" required minlength="6">
+                        <button type="button" class="password-toggle" aria-label="Mostrar senha">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="eye-icon">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <span class="form-hint">Crie uma senha fácil de lembrar</span>
                 </div>
                 <div class="form-group">
-                    <label for="idoso-telefone" class="form-label">Telefone de Emergência</label>
-                    <input type="tel" id="idoso-telefone" class="form-input" placeholder="192">
+                    <label for="idoso-telefone" class="form-label">Telefone de emergência</label>
+                    <input type="tel" id="idoso-telefone" class="form-input" placeholder="Ex: 192 ou (11) 99999-9999">
                 </div>
                 <div class="form-group">
-                    <label for="idoso-obs" class="form-label">Observações</label>
-                    <textarea id="idoso-obs" class="form-textarea" rows="3"></textarea>
+                    <label for="idoso-obs" class="form-label">Observações importantes</label>
+                    <textarea id="idoso-obs" class="form-textarea" rows="3" placeholder="Alergias, condições de saúde, etc."></textarea>
                 </div>
-                <button type="submit" class="btn btn-success btn-block">Cadastrar</button>
+                <button type="submit" class="btn btn-success btn-block">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                    Cadastrar
+                </button>
             </form>
         </div>
     </div>
@@ -152,27 +200,27 @@
         </header>
         <div class="container">
             <div class="menu-grid">
-                <button type="button" class="menu-card" id="btn-progresso" aria-label="Ver progresso">
+                <button type="button" class="menu-card cat-purple" id="btn-progresso" aria-label="Ver progresso">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
                     <span>Progresso</span>
                 </button>
-                <button type="button" class="menu-card" id="btn-dieta-cuidador" aria-label="Definir dieta">
+                <button type="button" class="menu-card cat-yellow" id="btn-dieta-cuidador" aria-label="Definir dieta">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
                     <span>Dieta</span>
                 </button>
-                <button type="button" class="menu-card" id="btn-medicamentos-cuidador" aria-label="Gerenciar medicamentos">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.5 20.5 3 13l7.5-7.5 7.5 7.5-7.5 7.5z"/><path d="m6.5 9.5 7.5 7.5"/><path d="M14 4h6v6"/><path d="m20 4-5 5"/></svg>
+                <button type="button" class="menu-card cat-blue" id="btn-medicamentos-cuidador" aria-label="Gerenciar medicamentos">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
                     <span>Medicamentos</span>
                 </button>
-                <button type="button" class="menu-card" id="btn-exercicios-cuidador" aria-label="Definir exercícios">
+                <button type="button" class="menu-card cat-green" id="btn-exercicios-cuidador" aria-label="Definir exercícios">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="3"/><path d="M12 22V8"/><path d="m5 12 7 3 7-3"/></svg>
                     <span>Exercícios</span>
                 </button>
-                <button type="button" class="menu-card" id="btn-visitas-cuidador" aria-label="Agendar visitas">
+                <button type="button" class="menu-card cat-teal" id="btn-visitas-cuidador" aria-label="Agendar visitas">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                     <span>Visitas</span>
                 </button>
-                <button type="button" class="menu-card" id="btn-editar-idoso" aria-label="Editar dados">
+                <button type="button" class="menu-card cat-pink" id="btn-editar-idoso" aria-label="Editar dados">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                     <span>Editar Dados</span>
                 </button>
@@ -193,7 +241,7 @@
             <div class="card">
                 <div class="form-group">
                     <label class="form-label">Período</label>
-                    <div style="display: flex; gap: 8px;">
+                    <div style="display: flex; gap: var(--spacing-sm);">
                         <button type="button" class="btn btn-secondary" id="btn-progresso-semana">Semana</button>
                         <button type="button" class="btn btn-primary" id="btn-progresso-mes">Mês</button>
                     </div>
@@ -216,34 +264,37 @@
             <div class="dias-tabs" id="dias-tabs-cuidador" role="tablist"></div>
             <form id="form-dieta" class="card">
                 <div class="form-group">
-                    <label for="dieta-cafe" class="form-label">Café da Manhã</label>
-                    <textarea id="dieta-cafe" class="form-textarea" rows="2"></textarea>
+                    <label for="dieta-cafe" class="form-label">☕ Café da Manhã</label>
+                    <textarea id="dieta-cafe" class="form-textarea" rows="2" placeholder="O que comer no café da manhã"></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="dieta-lanche-m" class="form-label">Lanche da Manhã</label>
-                    <textarea id="dieta-lanche-m" class="form-textarea" rows="2"></textarea>
+                    <label for="dieta-lanche-m" class="form-label">🍎 Lanche da Manhã</label>
+                    <textarea id="dieta-lanche-m" class="form-textarea" rows="2" placeholder="Frutas, sucos, etc."></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="dieta-almoco" class="form-label">Almoço</label>
-                    <textarea id="dieta-almoco" class="form-textarea" rows="2"></textarea>
+                    <label for="dieta-almoco" class="form-label">🍽️ Almoço</label>
+                    <textarea id="dieta-almoco" class="form-textarea" rows="2" placeholder="Refeição principal"></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="dieta-lanche-t" class="form-label">Lanche da Tarde</label>
-                    <textarea id="dieta-lanche-t" class="form-textarea" rows="2"></textarea>
+                    <label for="dieta-lanche-t" class="form-label">🥤 Lanche da Tarde</label>
+                    <textarea id="dieta-lanche-t" class="form-textarea" rows="2" placeholder="Opções leves"></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="dieta-jantar" class="form-label">Jantar</label>
-                    <textarea id="dieta-jantar" class="form-textarea" rows="2"></textarea>
+                    <label for="dieta-jantar" class="form-label">🌙 Jantar</label>
+                    <textarea id="dieta-jantar" class="form-textarea" rows="2" placeholder="Refeição da noite"></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="dieta-ceia" class="form-label">Ceia</label>
-                    <textarea id="dieta-ceia" class="form-textarea" rows="2"></textarea>
+                    <label for="dieta-ceia" class="form-label">🌛 Ceia</label>
+                    <textarea id="dieta-ceia" class="form-textarea" rows="2" placeholder="Opcional, antes de dormir"></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="dieta-obs" class="form-label">Observações</label>
-                    <textarea id="dieta-obs" class="form-textarea" rows="2"></textarea>
+                    <label for="dieta-obs" class="form-label">📝 Observações</label>
+                    <textarea id="dieta-obs" class="form-textarea" rows="2" placeholder="Restrições, preferências, etc."></textarea>
                 </div>
-                <button type="submit" class="btn btn-success btn-block">Salvar Dieta</button>
+                <button type="submit" class="btn btn-success btn-block">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                    Salvar Dieta
+                </button>
             </form>
         </div>
     </div>
@@ -259,8 +310,8 @@
         </header>
         <div class="container">
             <div id="lista-medicamentos-cuidador"></div>
-            <button type="button" class="btn btn-primary btn-block" id="btn-add-medicamento" style="margin-top: 16px;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <button type="button" class="btn btn-primary btn-block" id="btn-add-medicamento" style="margin-top: var(--spacing-md);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
                 Adicionar Medicamento
             </button>
         </div>
@@ -279,12 +330,12 @@
             <form id="form-medicamento" class="card">
                 <input type="hidden" id="med-id">
                 <div class="form-group">
-                    <label for="med-nome" class="form-label">Nome *</label>
-                    <input type="text" id="med-nome" class="form-input" required>
+                    <label for="med-nome" class="form-label">Nome do medicamento *</label>
+                    <input type="text" id="med-nome" class="form-input" placeholder="Ex: Losartana" required>
                 </div>
                 <div class="form-group">
                     <label for="med-dosagem" class="form-label">Dosagem *</label>
-                    <input type="text" id="med-dosagem" class="form-input" placeholder="Ex: 500mg" required>
+                    <input type="text" id="med-dosagem" class="form-input" placeholder="Ex: 50mg, 1 comprimido" required>
                 </div>
                 <div class="form-group">
                     <label for="med-horario" class="form-label">Horário</label>
@@ -298,14 +349,18 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="med-instrucoes" class="form-label">Instruções</label>
-                    <textarea id="med-instrucoes" class="form-textarea" rows="2"></textarea>
+                    <label for="med-instrucoes" class="form-label">Instruções de uso</label>
+                    <textarea id="med-instrucoes" class="form-textarea" rows="2" placeholder="Ex: Tomar em jejum, com água"></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="med-data-fim" class="form-label">Data Fim (opcional)</label>
+                    <label for="med-data-fim" class="form-label">Data de término (opcional)</label>
                     <input type="date" id="med-data-fim" class="form-input">
+                    <span class="form-hint">Deixe em branco para uso contínuo</span>
                 </div>
-                <button type="submit" class="btn btn-success btn-block">Salvar</button>
+                <button type="submit" class="btn btn-success btn-block">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                    Salvar
+                </button>
             </form>
         </div>
     </div>
@@ -321,8 +376,8 @@
         </header>
         <div class="container">
             <div id="lista-exercicios-cuidador"></div>
-            <button type="button" class="btn btn-primary btn-block" id="btn-add-exercicio" style="margin-top: 16px;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <button type="button" class="btn btn-primary btn-block" id="btn-add-exercicio" style="margin-top: var(--spacing-md);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
                 Adicionar Exercício
             </button>
         </div>
@@ -341,26 +396,29 @@
             <form id="form-exercicio" class="card">
                 <input type="hidden" id="ex-id">
                 <div class="form-group">
-                    <label for="ex-nome" class="form-label">Nome *</label>
-                    <input type="text" id="ex-nome" class="form-input" required>
+                    <label for="ex-nome" class="form-label">Nome do exercício *</label>
+                    <input type="text" id="ex-nome" class="form-input" placeholder="Ex: Caminhada leve" required>
                 </div>
                 <div class="form-group">
                     <label for="ex-descricao" class="form-label">Descrição</label>
-                    <textarea id="ex-descricao" class="form-textarea" rows="2"></textarea>
+                    <textarea id="ex-descricao" class="form-textarea" rows="2" placeholder="Detalhes sobre o exercício"></textarea>
                 </div>
                 <div class="form-group">
                     <label for="ex-duracao" class="form-label">Duração (minutos)</label>
-                    <input type="number" id="ex-duracao" class="form-input" min="1" value="30">
+                    <input type="number" id="ex-duracao" class="form-input" min="1" value="30" placeholder="30">
                 </div>
                 <div class="form-group">
-                    <label for="ex-frequencia" class="form-label">Frequência Semanal</label>
-                    <input type="number" id="ex-frequencia" class="form-input" min="1" max="7" value="3">
+                    <label for="ex-frequencia" class="form-label">Vezes por semana</label>
+                    <input type="number" id="ex-frequencia" class="form-input" min="1" max="7" value="3" placeholder="3">
                 </div>
                 <div class="form-group">
                     <label for="ex-instrucoes" class="form-label">Instruções</label>
-                    <textarea id="ex-instrucoes" class="form-textarea" rows="2"></textarea>
+                    <textarea id="ex-instrucoes" class="form-textarea" rows="2" placeholder="Cuidados, recomendações"></textarea>
                 </div>
-                <button type="submit" class="btn btn-success btn-block">Salvar</button>
+                <button type="submit" class="btn btn-success btn-block">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                    Salvar
+                </button>
             </form>
         </div>
     </div>
@@ -376,8 +434,8 @@
         </header>
         <div class="container">
             <div id="lista-visitas-cuidador"></div>
-            <button type="button" class="btn btn-primary btn-block" id="btn-add-visita" style="margin-top: 16px;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <button type="button" class="btn btn-primary btn-block" id="btn-add-visita" style="margin-top: var(--spacing-md);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
                 Agendar Visita
             </button>
         </div>
@@ -400,18 +458,21 @@
                     <input type="date" id="visita-data" class="form-input" required>
                 </div>
                 <div class="form-group">
-                    <label for="visita-hora-inicio" class="form-label">Hora Início</label>
+                    <label for="visita-hora-inicio" class="form-label">Hora de início</label>
                     <input type="time" id="visita-hora-inicio" class="form-input">
                 </div>
                 <div class="form-group">
-                    <label for="visita-hora-fim" class="form-label">Hora Fim</label>
+                    <label for="visita-hora-fim" class="form-label">Hora de término</label>
                     <input type="time" id="visita-hora-fim" class="form-input">
                 </div>
                 <div class="form-group">
                     <label for="visita-descricao" class="form-label">Descrição</label>
-                    <textarea id="visita-descricao" class="form-textarea" rows="2"></textarea>
+                    <textarea id="visita-descricao" class="form-textarea" rows="2" placeholder="Motivo da visita, observações"></textarea>
                 </div>
-                <button type="submit" class="btn btn-success btn-block">Salvar</button>
+                <button type="submit" class="btn btn-success btn-block">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                    Salvar
+                </button>
             </form>
         </div>
     </div>
@@ -428,19 +489,25 @@
         <div class="container">
             <form id="form-editar-idoso" class="card">
                 <div class="form-group">
-                    <label for="edit-idoso-nome" class="form-label">Nome *</label>
+                    <label for="edit-idoso-nome" class="form-label">Nome completo *</label>
                     <input type="text" id="edit-idoso-nome" class="form-input" required>
                 </div>
                 <div class="form-group">
-                    <label for="edit-idoso-telefone" class="form-label">Telefone de Emergência</label>
-                    <input type="tel" id="edit-idoso-telefone" class="form-input">
+                    <label for="edit-idoso-telefone" class="form-label">Telefone de emergência</label>
+                    <input type="tel" id="edit-idoso-telefone" class="form-input" placeholder="Ex: 192 ou (11) 99999-9999">
                 </div>
                 <div class="form-group">
-                    <label for="edit-idoso-obs" class="form-label">Observações</label>
-                    <textarea id="edit-idoso-obs" class="form-textarea" rows="3"></textarea>
+                    <label for="edit-idoso-obs" class="form-label">Observações importantes</label>
+                    <textarea id="edit-idoso-obs" class="form-textarea" rows="3" placeholder="Alergias, condições de saúde, etc."></textarea>
                 </div>
-                <button type="submit" class="btn btn-success btn-block">Salvar</button>
-                <button type="button" class="btn btn-danger btn-block" id="btn-excluir-idoso" style="margin-top: 8px;">Excluir Idoso</button>
+                <button type="submit" class="btn btn-success btn-block">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                    Salvar Alterações
+                </button>
+                <button type="button" class="btn btn-danger btn-block" id="btn-excluir-idoso" style="margin-top: var(--spacing-sm);">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    Excluir Cadastro
+                </button>
             </form>
         </div>
     </div>
@@ -448,14 +515,14 @@
     <!-- ==================== PAINEL DO IDOSO ==================== -->
     <div id="screen-idoso-home" class="screen">
         <header class="header">
-            <h1 class="header-title">Olá, <span id="idoso-nome-header"></span></h1>
+            <h1 class="header-title">Olá, <span id="idoso-nome-header"></span>!</h1>
             <div class="header-actions">
                 <button type="button" class="btn-icon" id="btn-font-decrease-idoso" aria-label="Diminuir fonte">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12H3M8 8l-4 4 4 4"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/></svg>
                 </button>
-                <span id="font-scale-display-idoso" aria-live="polite">100%</span>
+                <span id="font-scale-display-idoso" class="font-scale-display" aria-live="polite">100%</span>
                 <button type="button" class="btn-icon" id="btn-font-increase-idoso" aria-label="Aumentar fonte">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M16 8l4 4-4 4"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
                 </button>
                 <button type="button" class="btn-icon" id="btn-logout-idoso" aria-label="Sair">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -463,28 +530,44 @@
             </div>
         </header>
         <div class="container">
+            <!-- Seção de boas-vindas -->
+            <div class="welcome-section">
+                <div class="welcome-greeting">Bom dia! 👋</div>
+                <div class="welcome-date" id="welcome-date"></div>
+                <div class="welcome-summary" id="welcome-summary">
+                    <div class="summary-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                        <span id="summary-meds">0 medicamentos</span>
+                    </div>
+                    <div class="summary-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="3"/><path d="M12 22V8"/><path d="m5 12 7 3 7-3"/></svg>
+                        <span id="summary-exercises">0 exercícios</span>
+                    </div>
+                </div>
+            </div>
+            
             <div class="menu-grid">
-                <button type="button" class="menu-card" id="btn-dieta-idoso" aria-label="Ver dieta da semana">
+                <button type="button" class="menu-card cat-yellow" id="btn-dieta-idoso" aria-label="Ver dieta da semana">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
-                    <span>Dieta da Semana</span>
+                    <span>Dieta</span>
                 </button>
-                <button type="button" class="menu-card" id="btn-refeicao-idoso" aria-label="Registrar alimentação">
+                <button type="button" class="menu-card cat-green" id="btn-refeicao-idoso" aria-label="Registrar alimentação">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>
-                    <span>Registrar Alimentação</span>
+                    <span>Alimentação</span>
                 </button>
-                <button type="button" class="menu-card" id="btn-estado-idoso" aria-label="Registrar como estou hoje">
+                <button type="button" class="menu-card cat-purple" id="btn-estado-idoso" aria-label="Registrar como estou hoje">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
-                    <span>Como Estou Hoje</span>
+                    <span>Como Estou</span>
                 </button>
-                <button type="button" class="menu-card" id="btn-medicamentos-idoso" aria-label="Ver medicamentos">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.5 20.5 3 13l7.5-7.5 7.5 7.5-7.5 7.5z"/><path d="m6.5 9.5 7.5 7.5"/><path d="M14 4h6v6"/><path d="m20 4-5 5"/></svg>
+                <button type="button" class="menu-card cat-blue" id="btn-medicamentos-idoso" aria-label="Ver medicamentos">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
                     <span>Medicamentos</span>
                 </button>
-                <button type="button" class="menu-card" id="btn-exercicios-idoso" aria-label="Ver exercícios">
+                <button type="button" class="menu-card cat-green" id="btn-exercicios-idoso" aria-label="Ver exercícios">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="3"/><path d="M12 22V8"/><path d="m5 12 7 3 7-3"/></svg>
                     <span>Exercícios</span>
                 </button>
-                <button type="button" class="menu-card" id="btn-visitas-idoso" aria-label="Ver visitas">
+                <button type="button" class="menu-card cat-teal" id="btn-visitas-idoso" aria-label="Ver visitas">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                     <span>Visitas</span>
                 </button>
@@ -523,14 +606,14 @@
         <div class="container">
             <form id="form-refeicao" class="card">
                 <div class="form-group">
-                    <label for="refeicao-tipo" class="form-label">Tipo de Refeição</label>
+                    <label for="refeicao-tipo" class="form-label">Tipo de refeição</label>
                     <select id="refeicao-tipo" class="form-select">
-                        <option value="cafe_manha">Café da Manhã</option>
-                        <option value="lanche_manha">Lanche da Manhã</option>
-                        <option value="almoco">Almoço</option>
-                        <option value="lanche_tarde">Lanche da Tarde</option>
-                        <option value="jantar">Jantar</option>
-                        <option value="ceia">Ceia</option>
+                        <option value="cafe_manha">☕ Café da Manhã</option>
+                        <option value="lanche_manha">🍎 Lanche da Manhã</option>
+                        <option value="almoco">🍽️ Almoço</option>
+                        <option value="lanche_tarde">🥤 Lanche da Tarde</option>
+                        <option value="jantar">🌙 Jantar</option>
+                        <option value="ceia">🌛 Ceia</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -539,13 +622,19 @@
                 </div>
                 <div class="form-group">
                     <label for="refeicao-obs" class="form-label">Observações</label>
-                    <textarea id="refeicao-obs" class="form-textarea" rows="2"></textarea>
+                    <textarea id="refeicao-obs" class="form-textarea" rows="2" placeholder="Como se sentiu depois?"></textarea>
                 </div>
-                <button type="submit" class="btn btn-success btn-block">Registrar</button>
+                <button type="submit" class="btn btn-success btn-block">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                    Registrar
+                </button>
             </form>
 
-            <div class="card" style="margin-top: 16px;">
-                <h3 class="card-title">Registros de Hoje</h3>
+            <div class="card" style="margin-top: var(--spacing-md);">
+                <h3 class="card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    Registros de Hoje
+                </h3>
                 <div id="registros-hoje"></div>
             </div>
         </div>
@@ -586,7 +675,10 @@
                     <label for="estado-obs" class="form-label">Observações (opcional)</label>
                     <textarea id="estado-obs" class="form-textarea" rows="2" placeholder="Alguma observação sobre como você está hoje?"></textarea>
                 </div>
-                <button type="submit" class="btn btn-success btn-block">Registrar</button>
+                <button type="submit" class="btn btn-success btn-block">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                    Registrar
+                </button>
             </form>
         </div>
     </div>
@@ -601,7 +693,11 @@
             <div class="header-actions"></div>
         </header>
         <div class="container">
-            <p style="margin-bottom: 16px;">Marque os medicamentos que você já tomou hoje:</p>
+            <div class="card" style="margin-bottom: var(--spacing-md); background: var(--color-primary-light); border-left: 4px solid var(--color-primary);">
+                <p style="margin: 0; color: var(--color-primary-dark);">
+                    <strong>Toque no círculo</strong> ao lado de cada medicamento que você já tomou hoje.
+                </p>
+            </div>
             <div id="lista-medicamentos-idoso"></div>
         </div>
     </div>
@@ -616,7 +712,11 @@
             <div class="header-actions"></div>
         </header>
         <div class="container">
-            <p style="margin-bottom: 16px;">Marque os exercícios que você fez hoje:</p>
+            <div class="card" style="margin-bottom: var(--spacing-md); background: var(--color-success-light); border-left: 4px solid var(--color-success);">
+                <p style="margin: 0; color: #276749;">
+                    <strong>Toque no círculo</strong> ao lado de cada exercício que você fez hoje.
+                </p>
+            </div>
             <div id="lista-exercicios-idoso"></div>
         </div>
     </div>
@@ -627,7 +727,7 @@
             <button type="button" class="btn-icon btn-back" id="btn-back-visitas-idoso" aria-label="Voltar">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,18 9,12 15,6"/></svg>
             </button>
-            <h1 class="header-title">Visitas Agendadas</h1>
+            <h1 class="header-title">Próximas Visitas</h1>
             <div class="header-actions"></div>
         </header>
         <div class="container">
@@ -637,7 +737,7 @@
 
     <!-- ==================== EMERGÊNCIA ==================== -->
     <div id="screen-emergencia" class="screen">
-        <header class="header" style="background-color: #D32F2F;">
+        <header class="header" style="background: linear-gradient(135deg, var(--color-emergency) 0%, #C53030 100%);">
             <button type="button" class="btn-icon btn-back" id="btn-back-emergencia" aria-label="Voltar">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,18 9,12 15,6"/></svg>
             </button>
@@ -646,16 +746,32 @@
         </header>
         <div class="container">
             <div class="emergency-warning">
-                <strong>ATENÇÃO:</strong> Este é um protótipo e NÃO substitui serviços de emergência reais. Em caso de emergência real, ligue diretamente para os serviços de emergência.
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                <div>
+                    <strong>ATENÇÃO:</strong> Este é um protótipo e NÃO substitui serviços de emergência reais. Em caso de emergência real, ligue diretamente para os serviços de emergência (192 ou 190).
+                </div>
             </div>
 
             <div class="card">
-                <h2 class="card-title" style="color: #D32F2F;">Precisa de Ajuda?</h2>
-                <p>Ao pressionar o botão abaixo, você terá a opção de ligar para o número de emergência configurado.</p>
+                <h2 class="card-title" style="color: var(--color-emergency); font-size: calc(var(--font-base) * 1.3);">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="color: var(--color-emergency);">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                    </svg>
+                    Precisa de Ajuda?
+                </h2>
+                <p style="margin-bottom: var(--spacing-lg); color: var(--color-text-secondary);">
+                    Ao pressionar o botão abaixo, você terá a opção de ligar para o número de emergência configurado pelo seu cuidador.
+                </p>
                 
                 <button type="button" class="btn btn-emergency" id="btn-confirmar-emergencia">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                    PEDIR AJUDA
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                    </svg>
+                    PEDIR AJUDA AGORA
                 </button>
             </div>
         </div>
