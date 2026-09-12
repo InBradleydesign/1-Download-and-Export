@@ -79,7 +79,15 @@ public class CuidarApplication extends Application {
     
     private void initDemoData() {
         if (cuidadorRepository.count() == 0) {
-            DemoDataInitializer.init(this);
+            try {
+                Class<?> clazz = Class.forName("com.cuidarapp.DemoDataInitializer");
+                java.lang.reflect.Method method = clazz.getMethod("init", CuidarApplication.class);
+                method.invoke(null, this);
+            } catch (ClassNotFoundException e) {
+                // DemoDataInitializer não existe em builds release - ignorar
+            } catch (Exception e) {
+                android.util.Log.e("CuidarApp", "Erro ao inicializar dados demo", e);
+            }
         }
     }
     
