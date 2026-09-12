@@ -6,7 +6,8 @@ const App = {
     fontScale: 1,
     isProcessing: false,
     
-    diasSemana: ['', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo']
+    diasSemana: ['', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'],
+    diasSemanaAbrev: ['', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
 };
 
 // ==================== UTILITÁRIOS ====================
@@ -118,6 +119,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initCuidador();
     initIdoso();
     initFontControls();
+    initPasswordToggles();
+    initWelcomeDate();
     
     const result = callBridge('getUsuarioLogado');
     if (result.success && result.data) {
@@ -132,9 +135,137 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.classList.add('idoso-view');
             document.getElementById('idoso-nome-header').textContent = result.data.nome.split(' ')[0];
             showScreen('screen-idoso-home');
+            updateWelcomeSummary();
         }
     }
 });
+
+function initPasswordToggles() {
+    document.querySelectorAll('.password-toggle').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const wrapper = btn.closest('.password-wrapper');
+            const input = wrapper.querySelector('.form-input');
+            const eyeIcon = btn.querySelector('.eye-icon');
+            const eyeOffIcon = btn.querySelector('.eye-off-icon');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                if (eyeIcon) eyeIcon.style.display = 'none';
+                if (eyeOffIcon) eyeOffIcon.style.display = 'block';
+                btn.setAttribute('aria-label', 'Ocultar senha');
+            } else {
+                input.type = 'password';
+                if (eyeIcon) eyeIcon.style.display = 'block';
+                if (eyeOffIcon) eyeOffIcon.style.display = 'none';
+                btn.setAttribute('aria-label', 'Mostrar senha');
+            }
+        });
+    });
+}
+
+function initWelcomeDate() {
+    const dateEl = document.getElementById('welcome-date');
+    if (dateEl) {
+        const hoje = new Date();
+        const opcoes = { weekday: 'long', day: 'numeric', month: 'long' };
+        dateEl.textContent = hoje.toLocaleDateString('pt-BR', opcoes);
+    }
+}
+
+function updateWelcomeSummary() {
+    if (!App.usuario) return;
+    
+    const medsResult = callBridge('getMedicamentos', App.usuario.id);
+    const exResult = callBridge('getExercicios', App.usuario.id);
+    
+    const meds = medsResult.success && medsResult.data ? medsResult.data : [];
+    const exercises = exResult.success && exResult.data ? exResult.data : [];
+    
+    let medsConfirmed = 0;
+    let exercisesCompleted = 0;
+    
+    meds.forEach(med => {
+        const confirmResult = callBridge('isMedicamentoConfirmadoHoje', App.usuario.id, med.id);
+        if (confirmResult.success && confirmResult.data) medsConfirmed++;
+    });
+    
+    exercises.forEach(ex => {
+        const completeResult = callBridge('isExercicioConcluidoHoje', App.usuario.id, ex.id);
+        if (completeResult.success && completeResult.data) exercisesCompleted++;
+    });
+    
+    const medsTotal = meds.length;
+    const exTotal = exercises.length;
+    
+    const medsPct = medsTotal > 0 ? Math.round((medsConfirmed / medsTotal) * 100) : 0;
+    const exPct = exTotal > 0 ? Math.round((exercisesCompleted / exTotal) * 100) : 0;
+    
+    updateProgressCircle('progress-meds', medsPct);
+    updateProgressCircle('progress-exercises', exPct);
+    
+    const medsCountEl = document.getElementById('meds-count');
+    const exCountEl = document.getElementById('exercises-count');
+    const medsPctEl = document.getElementById('progress-meds-pct');
+    const exPctEl = document.getElementById('progress-exercises-pct');
+    
+    if (medsCountEl) medsCountEl.textContent = `${medsConfirmed} de ${medsTotal}`;
+    if (exCountEl) exCountEl.textContent = `${exercisesCompleted} de ${exTotal}`;
+    if (medsPctEl) medsPctEl.textContent = `${medsPct}%`;
+    if (exPctEl) exPctEl.textContent = `${exPct}%`;
+    
+    updateGreeting();
+    updateReminderCard(medsTotal - medsConfirmed, exTotal - exercisesCompleted);
+}
+
+function updateProgressCircle(elementId, percentage) {
+    const circle = document.getElementById(elementId);
+    if (!circle) return;
+    
+    const circumference = 100;
+    const offset = circumference - (percentage / 100) * circumference;
+    circle.style.strokeDashoffset = offset;
+}
+
+function updateReminderCard(pendingMeds, pendingExercises) {
+    const reminderMessage = document.getElementById('reminder-message');
+    const reminderDetail = document.getElementById('reminder-detail');
+    
+    if (!reminderMessage || !reminderDetail) return;
+    
+    if (pendingMeds > 0) {
+        reminderMessage.textContent = `Você tem ${pendingMeds} medicamento${pendingMeds > 1 ? 's' : ''} pendente${pendingMeds > 1 ? 's' : ''}.`;
+        reminderDetail.textContent = 'Não esqueça de verificar seus horários!';
+    } else if (pendingExercises > 0) {
+        reminderMessage.textContent = `Que tal fazer seu exercício de hoje?`;
+        reminderDetail.textContent = `Você tem ${pendingExercises} exercício${pendingExercises > 1 ? 's' : ''} para fazer.`;
+    } else {
+        reminderMessage.textContent = 'Parabéns! Você está em dia!';
+        reminderDetail.textContent = 'Continue cuidando da sua saúde.';
+    }
+}
+
+function updateGreeting() {
+    const greetingEl = document.querySelector('.welcome-greeting');
+    if (!greetingEl || !App.usuario) return;
+    
+    const hora = new Date().getHours();
+    let saudacao = 'Olá';
+    let emoji = '👋';
+    
+    if (hora >= 5 && hora < 12) {
+        saudacao = 'Bom dia';
+        emoji = '☀️';
+    } else if (hora >= 12 && hora < 18) {
+        saudacao = 'Boa tarde';
+        emoji = '🌤️';
+    } else {
+        saudacao = 'Boa noite';
+        emoji = '🌙';
+    }
+    
+    const nome = App.usuario.nome.split(' ')[0];
+    greetingEl.textContent = `${saudacao}, ${nome}! ${emoji}`;
+}
 
 function initFontControls() {
     document.getElementById('btn-font-decrease')?.addEventListener('click', () => updateFontScale(App.fontScale - 0.1));
@@ -157,20 +288,31 @@ function initLogin() {
             btn.classList.add('selected');
             btn.setAttribute('aria-pressed', 'true');
             selectedProfile = btn.dataset.profile;
-            document.getElementById('login-form').style.display = 'block';
+            
+            const loginForm = document.getElementById('login-form');
+            loginForm.style.display = 'block';
+            loginForm.classList.add('fade-in');
+            
+            setTimeout(() => {
+                document.getElementById('login-email').focus();
+            }, 100);
         });
     });
     
     document.getElementById('login-form').addEventListener('submit', (e) => {
         e.preventDefault();
         const btn = document.getElementById('btn-login');
+        const errorEl = document.getElementById('login-error');
+        
+        errorEl.style.display = 'none';
         
         preventDoubleClick(btn, async () => {
             const email = document.getElementById('login-email').value;
             const senha = document.getElementById('login-senha').value;
             
             if (!selectedProfile) {
-                showToast('Selecione um perfil', 'error');
+                errorEl.textContent = 'Selecione um perfil para continuar';
+                errorEl.style.display = 'block';
                 return;
             }
             
@@ -188,9 +330,12 @@ function initLogin() {
                     document.body.classList.add('idoso-view');
                     document.getElementById('idoso-nome-header').textContent = result.data.nome.split(' ')[0];
                     showScreen('screen-idoso-home');
+                    updateWelcomeSummary();
                 }
             } else {
-                showToast(result.error || 'Erro ao fazer login', 'error');
+                errorEl.textContent = result.error || 'E-mail ou senha incorretos. Verifique e tente novamente.';
+                errorEl.style.display = 'block';
+                document.getElementById('login-senha').focus();
             }
         });
     });
@@ -227,7 +372,18 @@ function loadIdososCuidador() {
     const container = document.getElementById('lista-idosos-cuidador');
     
     if (!result.success || !result.data || result.data.length === 0) {
-        container.innerHTML = '<div class="empty-state"><p>Nenhum idoso cadastrado ainda.</p></div>';
+        container.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                </div>
+                <h3>Nenhum idoso cadastrado</h3>
+                <p>Comece cadastrando um idoso para gerenciar seus cuidados.</p>
+            </div>
+        `;
         return;
     }
     
@@ -239,6 +395,9 @@ function loadIdososCuidador() {
             <div class="idoso-info">
                 <div class="idoso-nome">${escapeHtml(idoso.nome)}</div>
                 <div class="idoso-email">${escapeHtml(idoso.email)}</div>
+            </div>
+            <div class="arrow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
             </div>
         </button>
     `).join('');
@@ -487,24 +646,44 @@ function loadMedicamentosCuidador() {
     const container = document.getElementById('lista-medicamentos-cuidador');
     
     if (!result.success || !result.data || result.data.length === 0) {
-        container.innerHTML = '<div class="empty-state"><p>Nenhum medicamento cadastrado.</p></div>';
+        container.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+                    </svg>
+                </div>
+                <h3>Nenhum medicamento</h3>
+                <p>Adicione os medicamentos que o idoso precisa tomar.</p>
+            </div>
+        `;
         return;
     }
     
     container.innerHTML = result.data.map(med => `
-        <div class="card" style="margin-bottom: 8px;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                <div>
-                    <strong>${escapeHtml(med.nome)}</strong>
-                    <p style="color: var(--color-text-secondary); margin: 4px 0;">
-                        ${escapeHtml(med.dosagem)} ${med.horario ? '• ' + formatTime(med.horario) : ''}
-                    </p>
-                    ${med.instrucoes ? `<p style="font-size: var(--font-small);">${escapeHtml(med.instrucoes)}</p>` : ''}
+        <div class="item-card">
+            <div class="item-card-header">
+                <div class="item-card-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+                    </svg>
                 </div>
-                <div style="display: flex; gap: 8px;">
-                    <button type="button" class="btn btn-secondary" onclick="editarMedicamento(${med.id})" aria-label="Editar ${escapeHtml(med.nome)}">Editar</button>
-                    <button type="button" class="btn btn-danger" onclick="excluirMedicamento(${med.id})" aria-label="Excluir ${escapeHtml(med.nome)}">Excluir</button>
+                <div class="item-card-info">
+                    <div class="item-card-name">${escapeHtml(med.nome)}</div>
+                    <div class="item-card-detail">${escapeHtml(med.dosagem)}</div>
                 </div>
+                ${med.horario ? `<div class="item-card-time">🕐 ${formatTime(med.horario)}</div>` : ''}
+            </div>
+            ${med.instrucoes ? `<div class="item-card-instructions">${escapeHtml(med.instrucoes)}</div>` : ''}
+            <div class="item-card-actions">
+                <button type="button" class="btn btn-secondary" onclick="editarMedicamento(${med.id})" aria-label="Editar ${escapeHtml(med.nome)}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    Editar
+                </button>
+                <button type="button" class="btn btn-danger" onclick="excluirMedicamento(${med.id})" aria-label="Excluir ${escapeHtml(med.nome)}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    Excluir
+                </button>
             </div>
         </div>
     `).join('');
@@ -578,24 +757,43 @@ function loadExerciciosCuidador() {
     const container = document.getElementById('lista-exercicios-cuidador');
     
     if (!result.success || !result.data || result.data.length === 0) {
-        container.innerHTML = '<div class="empty-state"><p>Nenhum exercício cadastrado.</p></div>';
+        container.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="5" r="3"/><path d="M12 22V8"/><path d="m5 12 7 3 7-3"/>
+                    </svg>
+                </div>
+                <h3>Nenhum exercício</h3>
+                <p>Adicione exercícios para o idoso manter a saúde em dia.</p>
+            </div>
+        `;
         return;
     }
     
     container.innerHTML = result.data.map(ex => `
-        <div class="card" style="margin-bottom: 8px;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                <div>
-                    <strong>${escapeHtml(ex.nome)}</strong>
-                    <p style="color: var(--color-text-secondary); margin: 4px 0;">
-                        ${ex.duracaoMinutos} min • ${ex.frequenciaSemanal}x por semana
-                    </p>
-                    ${ex.descricao ? `<p style="font-size: var(--font-small);">${escapeHtml(ex.descricao)}</p>` : ''}
+        <div class="item-card">
+            <div class="item-card-header">
+                <div class="item-card-icon" style="background: var(--color-success-light);">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--color-success);">
+                        <circle cx="12" cy="5" r="3"/><path d="M12 22V8"/><path d="m5 12 7 3 7-3"/>
+                    </svg>
                 </div>
-                <div style="display: flex; gap: 8px;">
-                    <button type="button" class="btn btn-secondary" onclick="editarExercicio(${ex.id})" aria-label="Editar ${escapeHtml(ex.nome)}">Editar</button>
-                    <button type="button" class="btn btn-danger" onclick="excluirExercicio(${ex.id})" aria-label="Excluir ${escapeHtml(ex.nome)}">Excluir</button>
+                <div class="item-card-info">
+                    <div class="item-card-name">${escapeHtml(ex.nome)}</div>
+                    <div class="item-card-detail">${ex.duracaoMinutos} min • ${ex.frequenciaSemanal}x por semana</div>
                 </div>
+            </div>
+            ${ex.descricao ? `<div class="item-card-instructions">${escapeHtml(ex.descricao)}</div>` : ''}
+            <div class="item-card-actions">
+                <button type="button" class="btn btn-secondary" onclick="editarExercicio(${ex.id})" aria-label="Editar ${escapeHtml(ex.nome)}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    Editar
+                </button>
+                <button type="button" class="btn btn-danger" onclick="excluirExercicio(${ex.id})" aria-label="Excluir ${escapeHtml(ex.nome)}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    Excluir
+                </button>
             </div>
         </div>
     `).join('');
@@ -667,24 +865,46 @@ function loadVisitasCuidador() {
     const container = document.getElementById('lista-visitas-cuidador');
     
     if (!result.success || !result.data || result.data.length === 0) {
-        container.innerHTML = '<div class="empty-state"><p>Nenhuma visita agendada.</p></div>';
+        container.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                </div>
+                <h3>Nenhuma visita agendada</h3>
+                <p>Agende visitas para acompanhar o idoso pessoalmente.</p>
+            </div>
+        `;
         return;
     }
     
     container.innerHTML = result.data.map(v => `
-        <div class="card" style="margin-bottom: 8px;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                <div>
-                    <strong>${formatDate(v.data)}</strong>
-                    <span class="badge badge-${getStatusClass(v.status)}">${getStatusText(v.status)}</span>
-                    <p style="color: var(--color-text-secondary); margin: 4px 0;">
+        <div class="item-card">
+            <div class="item-card-header">
+                <div class="item-card-icon" style="background: var(--color-turquoise-light);">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--color-turquoise);">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                </div>
+                <div class="item-card-info">
+                    <div class="item-card-name">${formatDate(v.data)}</div>
+                    <div class="item-card-detail">
                         ${v.horaInicio ? formatTime(v.horaInicio) : ''} ${v.horaFim ? '- ' + formatTime(v.horaFim) : ''}
-                    </p>
-                    ${v.descricao ? `<p>${escapeHtml(v.descricao)}</p>` : ''}
+                    </div>
                 </div>
-                <div style="display: flex; gap: 8px;">
-                    <button type="button" class="btn btn-danger" onclick="excluirVisita(${v.id})" aria-label="Excluir visita">Excluir</button>
-                </div>
+                <span class="badge badge-${getStatusClass(v.status)}">${getStatusText(v.status)}</span>
+            </div>
+            ${v.descricao ? `<div class="item-card-instructions">${escapeHtml(v.descricao)}</div>` : ''}
+            <div class="item-card-actions">
+                <button type="button" class="btn btn-danger" onclick="excluirVisita(${v.id})" aria-label="Excluir visita">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    Cancelar Visita
+                </button>
             </div>
         </div>
     `).join('');
@@ -800,6 +1020,25 @@ function initFormEditarIdoso() {
 // ==================== IDOSO ====================
 function initIdoso() {
     document.getElementById('btn-logout-idoso')?.addEventListener('click', logout);
+    
+    document.getElementById('btn-check-meds')?.addEventListener('click', () => {
+        showScreen('screen-medicamentos-idoso');
+        loadMedicamentosIdoso();
+    });
+    
+    document.getElementById('btn-remind-later')?.addEventListener('click', () => {
+        showToast('Vamos te lembrar mais tarde!', 'info');
+    });
+    
+    document.getElementById('btn-question-yes')?.addEventListener('click', () => {
+        showToast('Ótimo! Continue assim!', 'success');
+        document.getElementById('question-card').style.display = 'none';
+    });
+    
+    document.getElementById('btn-question-no')?.addEventListener('click', () => {
+        showScreen('screen-medicamentos-idoso');
+        loadMedicamentosIdoso();
+    });
     
     document.getElementById('btn-dieta-idoso')?.addEventListener('click', () => {
         showScreen('screen-dieta-idoso');
