@@ -37,8 +37,9 @@ const App = {
     settings: { ...DEFAULT_SETTINGS },
     data: JSON.parse(JSON.stringify(DEFAULT_DATA)),
     history: [],
-    editStack: [],
-    currentCategory: 'all'
+    currentCategory: 'all',
+    caregiverTab: 'panel',
+    dietDay: null
 };
 
 // ==================== CONSTANTES DE DOMÍNIO ====================
@@ -104,7 +105,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     initNavigation();
     initModals();
     initSettings();
-    initCaregiverScreen();
     initEmergencyScreen();
     initPhotoPicker();
 
@@ -118,6 +118,15 @@ window.CuidarBack = function () {
     const openModal = document.querySelector('.modal-overlay.active');
     if (openModal) {
         closeModal(openModal.id);
+        return true;
+    }
+    const current = document.querySelector('.screen.active');
+    if (current && current.id === 'screen-elderly' && App.currentCategory !== 'all') {
+        setCategory('all');
+        return true;
+    }
+    if (current && current.id === 'screen-caregiver' && App.caregiverTab !== 'panel') {
+        setCaregiverTab('panel');
         return true;
     }
     return goBack();
@@ -319,7 +328,7 @@ function updateDisplayNames() {
         ? `${s.weightKg} kg • Proteína: ${protein.min}–${protein.max} g/dia`
         : 'Informe para calcular a meta de proteína');
 
-    document.querySelectorAll('.device-option').forEach(btn => {
+    document.querySelectorAll('[data-device]').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.device === s.deviceOwner);
     });
     setText('device-desc', s.deviceOwner === 'elderly'
@@ -341,10 +350,8 @@ function renderAvatars() {
     const { elderlyPhoto, caregiverPhoto } = App.settings;
     setAvatar('elderly-avatar', elderlyPhoto, ICONS.user);
     setAvatar('caregiver-avatar', caregiverPhoto, ICONS.users);
-    setAvatar('elderly-header-avatar', elderlyPhoto, ICONS.user);
     setAvatar('settings-elderly-avatar', elderlyPhoto, ICONS.user);
     setAvatar('settings-caregiver-avatar', caregiverPhoto, ICONS.users);
-    document.getElementById('elderly-header-avatar').classList.add('elderly');
 }
 
 function setAvatar(id, photo, fallbackIcon) {
@@ -390,14 +397,6 @@ function goBack() {
     const current = document.querySelector('.screen.active');
     if (!current || current.id === 'screen-home') return false;
 
-    if (current.id === 'screen-edit' && App.editStack.length > 1) {
-        App.editStack.pop();
-        const prev = App.editStack[App.editStack.length - 1];
-        renderEdit(prev.type, prev.id);
-        return true;
-    }
-
-    if (current.id === 'screen-edit') App.editStack = [];
     if (current.id === 'screen-elderly' || current.id === 'screen-caregiver') {
         App.history = [];
         showScreen('screen-home', { isBack: true });
@@ -411,7 +410,6 @@ function goBack() {
 
 function goHome() {
     App.history = [];
-    App.editStack = [];
     showScreen('screen-home', { isBack: true });
 }
 
@@ -428,51 +426,51 @@ function refreshCurrentScreen() {
 
 function initNavigation() {
     document.getElementById('btn-enter-elderly').addEventListener('click', () => {
-        setCategory('all');
+        App.currentCategory = 'all';
         showScreen('screen-elderly');
-        document.querySelector('.categories-scroll').scrollLeft = 0;
     });
     document.getElementById('btn-enter-caregiver').addEventListener('click', showPasswordModal);
-    document.getElementById('btn-elderly-home').addEventListener('click', goHome);
-    document.getElementById('btn-caregiver-home').addEventListener('click', goHome);
     document.getElementById('btn-caregiver-settings').addEventListener('click', () => showScreen('screen-settings'));
     document.getElementById('btn-emergency').addEventListener('click', () => showScreen('screen-emergency'));
 
+    document.querySelectorAll('[data-exit]').forEach(btn => btn.addEventListener('click', goHome));
     document.querySelectorAll('[data-back]').forEach(btn => btn.addEventListener('click', goBack));
 
-    document.querySelectorAll('.category-pill, #elderly-nav .nav-item[data-category]').forEach(el => {
-        el.addEventListener('click', () => {
-            setCategory(el.dataset.category);
-            document.getElementById('elderly-content').scrollTop = 0;
-            renderElderly();
-        });
+    document.querySelectorAll('#elderly-nav [data-category]').forEach(item => {
+        item.addEventListener('click', () => setCategory(item.dataset.category));
     });
+    document.querySelectorAll('#caregiver-nav [data-tab]').forEach(item => {
+        item.addEventListener('click', () => setCaregiverTab(item.dataset.tab));
+    });
+}
 
-    document.querySelectorAll('#caregiver-nav .nav-item').forEach(item => {
-        item.addEventListener('click', () => {
-            const action = item.dataset.action;
-            if (action === 'top') {
-                document.getElementById('caregiver-content').scrollTo({ top: 0, behavior: App.settings.animationsEnabled ? 'smooth' : 'auto' });
-            } else if (action === 'settings') {
-                showScreen('screen-settings');
-            } else {
-                openEditScreen(action, null);
-            }
-        });
+function markActiveNav(navId, attr, value) {
+    document.querySelectorAll(`#${navId} [data-${attr}]`).forEach(item => {
+        const active = item.dataset[attr] === value;
+        item.classList.toggle('active', active);
+        item.setAttribute('aria-current', active ? 'page' : 'false');
     });
+}
+
+function animateBody(id) {
+    const el = document.getElementById(id);
+    el.classList.remove('view-in');
+    void el.offsetWidth;
+    el.classList.add('view-in');
 }
 
 function setCategory(category) {
     App.currentCategory = category;
-    document.querySelectorAll('.category-pill').forEach(p => {
-        const active = p.dataset.category === category;
-        p.classList.toggle('active', active);
-        p.setAttribute('aria-selected', active);
-        if (active) p.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-    });
-    document.querySelectorAll('#elderly-nav .nav-item[data-category]').forEach(n => {
-        n.classList.toggle('active', n.dataset.category === category);
-    });
+    document.getElementById('elderly-content').scrollTop = 0;
+    renderElderly();
+    animateBody('elderly-body');
+}
+
+function setCaregiverTab(tab) {
+    App.caregiverTab = tab;
+    document.getElementById('caregiver-content').scrollTop = 0;
+    renderCaregiver();
+    animateBody('caregiver-body');
 }
 
 // ==================== MODAIS ====================
@@ -500,8 +498,12 @@ function initModals() {
     const pwInput = document.getElementById('password-input');
     document.getElementById('password-cancel').addEventListener('click', () => closeModal('password-modal'));
     document.getElementById('password-confirm').addEventListener('click', validatePassword);
+    pwInput.addEventListener('input', () => {
+        pwInput.value = pwInput.value.replace(/\D/g, '').slice(0, 4);
+        if (pwInput.value.length === 4) validatePassword();
+    });
     pwInput.addEventListener('keyup', e => {
-        if (e.key === 'Enter' || pwInput.value.length === 4) validatePassword();
+        if (e.key === 'Enter') validatePassword();
     });
 
     document.getElementById('confirm-cancel').addEventListener('click', () => closeModal('confirm-modal'));
@@ -531,6 +533,7 @@ async function validatePassword() {
     if (ok) {
         input.blur();
         closeModal('password-modal');
+        App.caregiverTab = 'panel';
         showScreen('screen-caregiver');
     } else {
         input.classList.add('error');
@@ -669,6 +672,7 @@ function renderElderly() {
     setText('elderly-salutation', hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite');
     const dateText = now.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
     setText('elderly-date', dateText.charAt(0).toUpperCase() + dateText.slice(1));
+    markActiveNav('elderly-nav', 'category', App.currentCategory);
 
     const body = document.getElementById('elderly-body');
     const renderers = {
@@ -687,6 +691,18 @@ function assistBanner() {
     return `<div class="assist-banner">${ICONS.users}<span>${escapeHtml(firstName(App.settings.caregiverName))} está registrando por ${escapeHtml(firstName(App.settings.elderlyName))}</span></div>`;
 }
 
+function sortTasks(tasks) {
+    return tasks.sort((a, b) => (a.done - b.done) || (a.time || '99').localeCompare(b.time || '99'));
+}
+
+function section(title, content, hint = '') {
+    return `
+        <section class="section">
+            <div class="section-header"><h2 class="section-title">${title}</h2>${hint ? `<span class="section-hint">${hint}</span>` : ''}</div>
+            ${content}
+        </section>`;
+}
+
 function renderElderlyToday() {
     const today = new Date();
     const stats = dayStats(today);
@@ -698,47 +714,34 @@ function renderElderlyToday() {
     else if (pending === 0) message = 'Falta só beber água!';
     else message = `Faltam ${pending} ${pending === 1 ? 'tarefa' : 'tarefas'} para hoje.`;
 
-    const tasks = [
-        ...medicationTasks(today),
-        ...exerciseTasks(today),
-        ...mealTasks(today)
-    ].sort((a, b) => (a.done - b.done) || (a.time || '99').localeCompare(b.time || '99'));
+    const tasks = sortTasks([...medicationTasks(today), ...exerciseTasks(today), ...mealTasks(today)]);
+    const moodShortcut = log.mood ? '' : `
+        <button class="task-card" data-goto="health">
+            <span class="task-avatar emoji">🙂</span>
+            <span class="task-info">
+                <span class="task-title">Como você está hoje?</span>
+                <span class="task-subtitle">Toque para contar ao seu cuidador</span>
+            </span>
+            <span class="chevron">${ICONS.chevron}</span>
+        </button>`;
 
     return `
         ${summaryCard(stats.pct, message)}
         ${waterCard()}
-        ${!log.mood ? `
-            <button class="cta-card" data-goto="health">
-                <span class="cta-emoji">🙂</span>
-                <span class="task-info">
-                    <span class="task-title">Como você está hoje?</span>
-                    <span class="task-subtitle">Toque para contar ao seu cuidador</span>
-                </span>
-                <span class="profile-arrow">${ICONS.chevron}</span>
-            </button>` : ''}
-        <section class="section">
-            <div class="section-header"><h2 class="section-title">Tarefas de Hoje</h2></div>
-            ${tasks.length ? tasks.map(taskCard).join('') : emptyState('Tudo em dia!', 'Não há tarefas para hoje.')}
-        </section>
+        ${moodShortcut}
+        ${section('Tarefas de hoje', tasks.length ? tasks.map(taskCard).join('') : emptyState('Tudo em dia!', 'Não há tarefas para hoje.'), `${stats.meds.done + stats.exercises.done + stats.meals.done} de ${stats.meds.total + stats.exercises.total + stats.meals.total}`)}
         ${visitsSection()}
     `;
 }
 
 function renderElderlyMeds() {
     const today = new Date();
-    const tasks = medicationTasks(today).sort((a, b) => (a.done - b.done) || (a.time || '99').localeCompare(b.time || '99'));
+    const tasks = sortTasks(medicationTasks(today));
     const others = App.data.medications.filter(m => !isMedicationScheduled(m, today));
     return `
-        <section class="section section-first">
-            <div class="section-header"><h2 class="section-title">Remédios de Hoje</h2></div>
-            ${tasks.length ? tasks.map(taskCard).join('') : emptyState('Nenhum remédio hoje', 'Seu cuidador pode cadastrar os remédios.')}
-        </section>
-        ${others.length ? `
-        <section class="section">
-            <div class="section-header"><h2 class="section-title">Em outros dias</h2></div>
-            ${others.map(m => infoCard('medication', ICONS.pill, m.name, `${m.dosage} • ${frequencyLabel(m.frequency)}`)).join('')}
-        </section>` : ''}
-        <div class="tip-card">${ICONS.info}<div><strong>Dica</strong>Tome os remédios sempre no mesmo horário e marque aqui logo depois.</div></div>
+        ${section('Remédios de hoje', tasks.length ? tasks.map(taskCard).join('') : emptyState('Nenhum remédio hoje', 'Seu cuidador pode cadastrar os remédios.'))}
+        ${others.length ? section('Em outros dias', others.map(m => infoCard('medication', ICONS.pill, m.name, `${m.dosage} • ${frequencyLabel(m.frequency)}`)).join('')) : ''}
+        ${tip('', ICONS.info, 'Dica', 'Tome os remédios sempre no mesmo horário e marque aqui logo depois.')}
     `;
 }
 
@@ -750,24 +753,14 @@ function renderElderlyExercises() {
     const others = App.data.exercises.filter(e => !isExerciseScheduled(e, today));
 
     return `
-        <div class="task-card">
-            <div class="task-avatar" style="background: var(--color-exercise); color: var(--color-exercise-icon);">${ICONS.exercise}</div>
-            <div class="task-info">
-                <div class="task-title">${sessions} ${sessions === 1 ? 'dia ativo' : 'dias ativos'} na semana</div>
-                <div class="task-subtitle">${sessions >= WEEKLY_EXERCISE_GOAL ? 'Meta alcançada! Continue assim.' : 'Meta: exercitar-se de 3 a 5 vezes por semana'}</div>
-                <div class="bar"><div class="bar-fill" style="width:${pct}%; background: var(--color-exercise-icon);"></div></div>
-            </div>
+        <div class="card">
+            <div class="task-title">${sessions} ${sessions === 1 ? 'dia ativo' : 'dias ativos'} na semana</div>
+            <div class="task-subtitle">${sessions >= WEEKLY_EXERCISE_GOAL ? 'Meta alcançada! Continue assim.' : 'Meta: exercitar-se de 3 a 5 vezes por semana'}</div>
+            <div class="bar"><div class="bar-fill exercise" style="width:${pct}%"></div></div>
         </div>
-        <section class="section">
-            <div class="section-header"><h2 class="section-title">Exercícios de Hoje</h2></div>
-            ${tasks.length ? tasks.map(taskCard).join('') : emptyState('Dia de descanso', 'Não há exercícios marcados para hoje.')}
-        </section>
-        ${others.length ? `
-        <section class="section">
-            <div class="section-header"><h2 class="section-title">Outros dias da semana</h2></div>
-            ${others.map(e => infoCard('exercise', ICONS.exercise, e.name, `${EXERCISE_TYPES[e.type]} • ${daysLabel(e.days)}`)).join('')}
-        </section>` : ''}
-        <div class="tip-card exercise">${ICONS.alert}<div><strong>Segurança em primeiro lugar</strong>Faça perto de uma cadeira firme. Se sentir tontura ou dor, pare e use o botão SOS.</div></div>
+        ${section('Exercícios de hoje', tasks.length ? tasks.map(taskCard).join('') : emptyState('Dia de descanso', 'Não há exercícios marcados para hoje.'))}
+        ${others.length ? section('Outros dias', others.map(e => infoCard('exercise', ICONS.exercise, e.name, `${EXERCISE_TYPES[e.type]} • ${daysLabel(e.days)}`)).join('')) : ''}
+        ${tip('exercise', ICONS.alert, 'Segurança em primeiro lugar', 'Faça perto de uma cadeira firme. Se sentir tontura ou dor, pare e use o botão SOS.')}
     `;
 }
 
@@ -776,15 +769,9 @@ function renderElderlyFood() {
     const protein = proteinGoal();
     return `
         ${waterCard()}
-        <section class="section section-first">
-            <div class="section-header"><h2 class="section-title">Refeições de Hoje</h2></div>
-            ${mealTasks(today).map(taskCard).join('')}
-        </section>
-        <div class="tip-card food">${ICONS.food}<div>
-            <strong>Proteína em todas as refeições</strong>
-            ${protein ? `Sua meta é de ${protein.min} a ${protein.max} g por dia. ` : ''}Ovos, feijão, lentilha, frango, peixe, leite e iogurte ajudam a manter a força dos músculos.
-        </div></div>
-        <div class="tip-card">${ICONS.water}<div><strong>Beba água mesmo sem sede</strong>Com a idade, a sede diminui. Deixe um copo sempre por perto.</div></div>
+        ${section('Refeições de hoje', mealTasks(today).map(taskCard).join(''))}
+        ${tip('food', ICONS.food, 'Proteína em todas as refeições', `${protein ? `Sua meta é de ${protein.min} a ${protein.max} g por dia. ` : ''}Ovos, feijão, lentilha, frango, peixe, leite e iogurte ajudam a manter a força dos músculos.`)}
+        ${tip('', ICONS.water, 'Beba água mesmo sem sede', 'Com a idade, a sede diminui. Deixe um copo sempre por perto.')}
     `;
 }
 
@@ -792,33 +779,29 @@ function renderElderlyHealth() {
     const log = getLog();
     const days = lastDays(7);
     return `
-        <div class="mood-card">
+        <div class="card">
             <div class="mood-question">Como você está se sentindo?</div>
             <div class="mood-grid">
                 ${MOODS.map(m => `
-                    <button class="mood-btn ${log.mood === m.value ? 'selected' : ''}" data-mood="${m.value}" aria-label="${m.label}">
+                    <button class="mood-btn ${log.mood === m.value ? 'selected' : ''}" data-mood="${m.value}" aria-label="${m.label}" aria-pressed="${log.mood === m.value}">
                         <span class="mood-emoji">${m.emoji}</span>
                         <span class="mood-label">${m.label}</span>
                     </button>`).join('')}
             </div>
         </div>
-        <section class="section">
-            <div class="section-header"><h2 class="section-title">Está sentindo algo?</h2></div>
+        ${section('Está sentindo algo?', `
             <div class="chips">
-                ${SYMPTOMS.map(s => `<button class="chip ${log.symptoms.includes(s) ? 'selected' : ''}" data-symptom="${s}">${s}</button>`).join('')}
+                ${SYMPTOMS.map(s => `<button class="chip ${log.symptoms.includes(s) ? 'selected' : ''}" data-symptom="${s}" aria-pressed="${log.symptoms.includes(s)}">${s}</button>`).join('')}
             </div>
-            <button class="fall-btn" data-fall>${ICONS.alert}Tive uma queda</button>
-        </section>
-        <section class="section">
-            <div class="section-header"><h2 class="section-title">Minha semana</h2></div>
-            <div class="mood-week">
+            <button class="danger-btn" data-fall>${ICONS.alert}Tive uma queda</button>`)}
+        ${section('Minha semana', `
+            <div class="card mood-week">
                 ${days.map(d => {
                     const l = peekLog(dateKey(d));
                     const mood = l && l.mood ? MOODS.find(m => m.value === l.mood).emoji : '·';
                     return `<div><div class="mood-week-day">${WEEKDAYS_SHORT[d.getDay()]}</div><div class="mood-week-emoji">${mood}</div></div>`;
                 }).join('')}
-            </div>
-        </section>
+            </div>`)}
     `;
 }
 
@@ -827,14 +810,13 @@ function medicationTasks(date) {
     return App.data.medications.filter(m => isMedicationScheduled(m, date)).map(m => ({
         id: m.id,
         type: 'medication',
+        kind: 'medication',
         title: m.name,
         subtitle: m.dosage,
         detail: m.instructions,
         time: m.time,
         done: log.meds.includes(m.id),
-        icon: ICONS.pill,
-        color: 'var(--color-medication)',
-        iconColor: 'var(--color-medication-icon)'
+        icon: ICONS.pill
     }));
 }
 
@@ -843,15 +825,14 @@ function exerciseTasks(date) {
     return App.data.exercises.filter(e => isExerciseScheduled(e, date)).map(e => ({
         id: e.id,
         type: 'exercise',
+        kind: 'exercise',
         title: e.name,
         subtitle: `${e.duration} min`,
         tag: e.type,
         detail: e.description,
         time: e.time,
         done: log.exercises.includes(e.id),
-        icon: ICONS.exercise,
-        color: 'var(--color-exercise)',
-        iconColor: 'var(--color-exercise-icon)'
+        icon: ICONS.exercise
     }));
 }
 
@@ -860,26 +841,25 @@ function mealTasks(date) {
     return mealsFor(date).map(meal => ({
         id: meal.key,
         type: 'meal',
+        kind: 'food',
         title: meal.label,
         subtitle: meal.menu || 'Toque no círculo quando comer',
         time: meal.time,
         done: log.meals.includes(meal.key),
-        icon: ICONS.food,
-        color: 'var(--color-food)',
-        iconColor: 'var(--color-food-icon)'
+        icon: ICONS.food
     }));
 }
 
 function taskCard(task) {
     return `
         <div class="task-card ${task.done ? 'done' : ''}">
-            <div class="task-avatar" style="background: ${task.color}; color: ${task.iconColor};">${task.icon}</div>
+            <div class="task-avatar ${task.kind}">${task.icon}</div>
             <div class="task-info">
                 <div class="task-title">${escapeHtml(task.title)}</div>
                 <div class="task-subtitle">${escapeHtml(task.subtitle)}</div>
                 ${task.detail && !task.done ? `<div class="task-detail">${escapeHtml(task.detail)}</div>` : ''}
-                ${task.time || task.tag ? `<div class="task-badges">
-                    ${task.time ? `<span class="task-badge">${ICONS.clock}${task.time}</span>` : ''}
+                ${task.time || task.tag ? `<div class="task-meta">
+                    ${task.time ? `<span class="task-time">${ICONS.clock}${task.time}</span>` : ''}
                     ${task.tag ? `<span class="type-tag type-${task.tag}">${EXERCISE_TYPES[task.tag]}</span>` : ''}
                 </div>` : ''}
             </div>
@@ -891,17 +871,22 @@ function taskCard(task) {
     `;
 }
 
-function infoCard(kind, icon, title, subtitle, onclick = '') {
+function infoCard(kind, icon, title, subtitle, editAttrs = '') {
+    const tag = editAttrs ? 'button' : 'div';
     return `
-        <div class="task-card" ${onclick ? `onclick="${onclick}" role="button" tabindex="0"` : ''}>
-            <div class="task-avatar" style="background: var(--color-${kind}); color: var(--color-${kind}-icon);">${icon}</div>
-            <div class="task-info">
-                <div class="task-title">${escapeHtml(title)}</div>
-                <div class="task-subtitle">${escapeHtml(subtitle)}</div>
-            </div>
-            ${onclick ? `<div class="profile-arrow">${ICONS.chevron}</div>` : ''}
-        </div>
+        <${tag} class="task-card" ${editAttrs}>
+            <span class="task-avatar ${kind}">${icon}</span>
+            <span class="task-info">
+                <span class="task-title">${escapeHtml(title)}</span>
+                <span class="task-subtitle">${escapeHtml(subtitle)}</span>
+            </span>
+            ${editAttrs ? `<span class="chevron">${ICONS.chevron}</span>` : ''}
+        </${tag}>
     `;
+}
+
+function tip(kind, icon, title, text) {
+    return `<div class="tip ${kind}">${icon}<div><strong>${escapeHtml(title)}</strong>${escapeHtml(text)}</div></div>`;
 }
 
 function summaryCard(pct, message) {
@@ -929,10 +914,10 @@ function waterCard() {
         `<span class="water-cup ${i < log.water ? 'filled' : ''}"></span>`).join('');
     const status = log.water >= goal ? 'Meta do dia alcançada!' : `Faltam ${goal - log.water} ${goal - log.water === 1 ? 'copo' : 'copos'}`;
     return `
-        <div class="water-card">
-            <div class="water-top">
-                <div class="water-icon">${ICONS.water}</div>
-                <div class="water-info">
+        <div class="card">
+            <div class="water-row">
+                <div class="task-avatar water">${ICONS.water}</div>
+                <div class="task-info">
                     <div class="task-title">Água: ${log.water} de ${goal} copos</div>
                     <div class="task-subtitle">${status}</div>
                 </div>
@@ -948,14 +933,9 @@ function waterCard() {
 
 function visitsSection() {
     const visits = upcomingVisits().slice(0, 3);
-    return `
-        <section class="section">
-            <div class="section-header"><h2 class="section-title">Próximas Visitas</h2></div>
-            ${visits.length
-                ? visits.map(v => infoCard('visit', ICONS.calendar, formatDate(v.date), `${v.description || 'Visita'}${v.time ? ' • ' + v.time : ''}`)).join('')
-                : emptyState('', 'Nenhuma visita agendada.', true)}
-        </section>
-    `;
+    return section('Próximas visitas', visits.length
+        ? visits.map(v => infoCard('visit', ICONS.calendar, formatDate(v.date), `${v.description || 'Visita'}${v.time ? ' • ' + v.time : ''}`)).join('')
+        : emptyState('', 'Nenhuma visita agendada.'));
 }
 
 function bindElderlyEvents(root) {
@@ -966,7 +946,7 @@ function bindElderlyEvents(root) {
         btn.addEventListener('click', () => changeWater(Number(btn.dataset.water)));
     });
     root.querySelectorAll('[data-goto]').forEach(btn => {
-        btn.addEventListener('click', () => { setCategory(btn.dataset.goto); renderElderly(); });
+        btn.addEventListener('click', () => setCategory(btn.dataset.goto));
     });
     root.querySelectorAll('[data-mood]').forEach(btn => {
         btn.addEventListener('click', () => setMood(Number(btn.dataset.mood)));
@@ -1081,82 +1061,95 @@ async function registerFall() {
 }
 
 // ==================== TELA DO CUIDADOR ====================
-function initCaregiverScreen() {
-    document.getElementById('btn-add-medication').addEventListener('click', () => openEditScreen('medication', null));
-    document.getElementById('btn-add-exercise').addEventListener('click', () => openEditScreen('exercise', null));
-    document.getElementById('btn-add-visit').addEventListener('click', () => openEditScreen('visit', null));
-    document.getElementById('btn-edit-diet').addEventListener('click', () => openEditScreen('diet', null));
-    document.getElementById('btn-view-all-meds').addEventListener('click', () => openEditScreen('medication-list', null));
-    document.getElementById('btn-view-all-visits').addEventListener('click', () => openEditScreen('visit-list', null));
-}
-
 function renderCaregiver() {
-    renderCaregiverAlerts();
-    renderCaregiverProgress();
-    renderCaregiverWeek();
-    renderCaregiverMeds();
-    renderCaregiverVisits();
-    document.querySelectorAll('#caregiver-nav .nav-item').forEach(n => n.classList.toggle('active', n.dataset.action === 'top'));
+    markActiveNav('caregiver-nav', 'tab', App.caregiverTab);
+    const renderers = {
+        panel: renderCaregiverPanel,
+        medication: renderCaregiverMeds,
+        exercise: renderCaregiverExercises,
+        diet: renderCaregiverDiet,
+        visit: renderCaregiverVisits
+    };
+    const body = document.getElementById('caregiver-body');
+    body.innerHTML = (renderers[App.caregiverTab] || renderCaregiverPanel)();
+    bindCaregiverEvents(body);
 }
 
-function renderCaregiverAlerts() {
-    const container = document.getElementById('caregiver-alerts');
-    const alerts = App.data.alerts.filter(a => !a.seen);
-    const emoji = { fall: '🚨', dizzy: '😵', mood: '😟' };
-    const title = { fall: 'Queda registrada', dizzy: 'Mal-estar no exercício', mood: 'Humor baixo' };
-
-    container.innerHTML = alerts.map(a => `
-        <div class="alert-card ${a.type === 'mood' ? 'warning' : ''}">
-            <span class="alert-emoji">${emoji[a.type] || '⚠️'}</span>
-            <div class="alert-body">
-                <div class="alert-title">${title[a.type] || 'Alerta'}</div>
-                <div class="task-subtitle">${escapeHtml(a.message)}</div>
-                <div class="alert-time">${formatDate(a.date)} às ${a.time}</div>
-            </div>
-            <button class="alert-dismiss" data-alert="${a.id}">Visto</button>
-        </div>
-    `).join('');
-
-    container.querySelectorAll('[data-alert]').forEach(btn => {
+function bindCaregiverEvents(root) {
+    root.querySelectorAll('[data-edit]').forEach(btn => {
+        btn.addEventListener('click', () => openEditScreen(btn.dataset.edit, btn.dataset.id ? Number(btn.dataset.id) : null));
+    });
+    root.querySelectorAll('[data-alert]').forEach(btn => {
         btn.addEventListener('click', () => {
             const alert = App.data.alerts.find(a => a.id === Number(btn.dataset.alert));
             if (alert) alert.seen = true;
             saveToStorage();
-            renderCaregiverAlerts();
+            renderCaregiver();
         });
     });
+    const weightBtn = root.querySelector('[data-weight]');
+    if (weightBtn) weightBtn.addEventListener('click', editWeight);
+    if (App.caregiverTab === 'diet') bindDietEditor(root);
 }
 
-function renderCaregiverProgress() {
+function editAttrs(type, id) {
+    return `data-edit="${type}"${id ? ` data-id="${id}"` : ''}`;
+}
+
+function addButton(label, type) {
+    return `<button class="add-btn" ${editAttrs(type)}>${ICONS.plus}${label}</button>`;
+}
+
+function renderCaregiverPanel() {
+    return renderCaregiverAlerts() + renderCaregiverToday() + renderCaregiverWeek();
+}
+
+function renderCaregiverAlerts() {
+    const alerts = App.data.alerts.filter(a => !a.seen);
+    if (!alerts.length) return '';
+    const emoji = { fall: '🚨', dizzy: '😵', mood: '😟' };
+    const title = { fall: 'Queda registrada', dizzy: 'Mal-estar no exercício', mood: 'Humor baixo' };
+    return section('Avisos', alerts.map(a => `
+        <div class="alert-card ${a.type === 'mood' ? 'warning' : ''}">
+            <span class="alert-emoji">${emoji[a.type] || '⚠️'}</span>
+            <div class="task-info">
+                <div class="task-title">${title[a.type] || 'Alerta'}</div>
+                <div class="task-subtitle">${escapeHtml(a.message)}</div>
+                <div class="alert-time">${formatDate(a.date)} às ${a.time}</div>
+            </div>
+            <button class="pill-btn" data-alert="${a.id}">Visto</button>
+        </div>`).join(''));
+}
+
+function renderCaregiverToday() {
     const stats = dayStats(new Date());
     const log = getLog();
     const mood = log.mood ? MOODS.find(m => m.value === log.mood) : null;
 
-    const stat = (label, color, done, total, unit = '') => {
+    const stat = (label, kind, done, total, unit = '') => {
         const pct = total ? Math.min(100, Math.round((done / total) * 100)) : 0;
         return `
-            <div class="stat-card">
-                <div class="stat-label"><span class="stat-dot" style="background:${color}"></span>${label}</div>
+            <div class="card">
+                <div class="stat-label"><span class="stat-dot ${kind}"></span>${label}</div>
                 <div class="stat-value">${done}<small> / ${total}${unit}</small></div>
-                <div class="bar"><div class="bar-fill" style="width:${pct}%; background:${color};"></div></div>
+                <div class="bar"><div class="bar-fill ${kind}" style="width:${pct}%"></div></div>
             </div>`;
     };
 
-    document.getElementById('caregiver-progress').innerHTML = `
+    return section('Hoje', `
         <div class="stats-grid">
-            ${stat('Remédios', 'var(--color-medication-icon)', stats.meds.done, stats.meds.total)}
-            ${stat('Exercícios', 'var(--color-exercise-icon)', stats.exercises.done, stats.exercises.total)}
-            ${stat('Refeições', 'var(--color-food-icon)', stats.meals.done, stats.meals.total)}
-            ${stat('Água', 'var(--color-water-icon)', stats.water.done, stats.water.total, ' copos')}
+            ${stat('Remédios', 'medication', stats.meds.done, stats.meds.total)}
+            ${stat('Exercícios', 'exercise', stats.exercises.done, stats.exercises.total)}
+            ${stat('Refeições', 'food', stats.meals.done, stats.meals.total)}
+            ${stat('Água', 'water', stats.water.done, stats.water.total, ' copos')}
         </div>
-        <div class="task-card" style="margin-top: var(--spacing-md);">
-            <div class="task-avatar" style="background: var(--color-health); font-size: calc(26px * var(--font-scale));">${mood ? mood.emoji : '❔'}</div>
+        <div class="task-card stats-follow">
+            <span class="task-avatar emoji">${mood ? mood.emoji : '❔'}</span>
             <div class="task-info">
                 <div class="task-title">Humor: ${mood ? mood.label : 'ainda não informado'}</div>
                 <div class="task-subtitle">${log.symptoms.length ? 'Sintomas: ' + escapeHtml(log.symptoms.join(', ')) : 'Nenhum sintoma relatado hoje'}</div>
             </div>
-        </div>
-    `;
+        </div>`);
 }
 
 function renderCaregiverWeek() {
@@ -1168,9 +1161,8 @@ function renderCaregiverWeek() {
     const sessions = weeklyExerciseSessions();
     const protein = proteinGoal();
 
-    document.getElementById('caregiver-week').innerHTML = `
-        <div class="week-card">
-            <div class="task-title">Adesão à rotina</div>
+    return section('Últimos 7 dias', `
+        <div class="card">
             <div class="task-subtitle">Tarefas cumpridas por dia (remédios, exercícios, refeições e água)</div>
             <div class="week-chart">
                 ${stats.map(s => {
@@ -1190,29 +1182,89 @@ function renderCaregiverWeek() {
                 <div><div class="week-summary-value">${avgWater.toFixed(1).replace('.', ',')}</div><div class="week-summary-label">copos de água/dia</div></div>
             </div>
         </div>
-        ${sessions < WEEKLY_EXERCISE_GOAL ? `<div class="tip-card exercise" style="margin-top: var(--spacing-md);">${ICONS.exercise}<div><strong>Incentive o movimento</strong>Exercícios de força e equilíbrio de 3 a 5 vezes por semana reduzem quedas em até 34%.</div></div>` : ''}
-        ${!protein ? `<button class="tip-card food" style="margin-top: var(--spacing-md); width:100%; border:none; text-align:left; cursor:pointer;" id="btn-tip-weight">${ICONS.food}<div><strong>Informe o peso do idoso</strong>Assim o app calcula a meta diária de proteína recomendada (ESPEN).</div></button>`
-            : `<div class="tip-card food" style="margin-top: var(--spacing-md);">${ICONS.food}<div><strong>Meta de proteína: ${protein.min}–${protein.max} g/dia</strong>${protein.perKg} g por kg de peso. Inclua proteína em todas as refeições da dieta.</div></div>`}
-    `;
-
-    const weightBtn = document.getElementById('btn-tip-weight');
-    if (weightBtn) weightBtn.addEventListener('click', editWeight);
+        ${sessions < WEEKLY_EXERCISE_GOAL ? tip('exercise', ICONS.exercise, 'Incentive o movimento', 'Exercícios de força e equilíbrio de 3 a 5 vezes por semana reduzem quedas em até 34%.') : ''}
+        ${protein
+            ? tip('food', ICONS.food, `Meta de proteína: ${protein.min}–${protein.max} g/dia`, `${protein.perKg} g por kg de peso. Inclua proteína em todas as refeições da dieta.`)
+            : `<button class="tip food" data-weight>${ICONS.food}<div><strong>Informe o peso do idoso</strong>Assim o app calcula a meta diária de proteína recomendada (ESPEN).</div></button>`}
+    `);
 }
 
 function renderCaregiverMeds() {
-    const container = document.getElementById('caregiver-meds-list');
-    const meds = App.data.medications.slice(0, 3);
-    container.innerHTML = meds.length
-        ? meds.map(m => infoCard('medication', ICONS.pill, m.name, `${m.dosage}${m.time ? ' • ' + m.time : ''}`, `openEditScreen('medication', ${m.id})`)).join('')
-        : emptyState('', 'Nenhum medicamento cadastrado', true);
+    const meds = [...App.data.medications].sort((a, b) => (a.time || '99').localeCompare(b.time || '99'));
+    return section('Remédios', addButton('Adicionar remédio', 'medication') + (meds.length
+        ? meds.map(m => infoCard('medication', ICONS.pill, m.name, `${m.dosage}${m.time ? ' • ' + m.time : ''} • ${frequencyLabel(m.frequency)}`, editAttrs('medication', m.id))).join('')
+        : emptyState('Nenhum remédio', 'Cadastre os remédios para o idoso acompanhar.')), meds.length ? `${meds.length} cadastrado${meds.length > 1 ? 's' : ''}` : '');
+}
+
+function renderCaregiverExercises() {
+    const sessions = weeklyExerciseSessions();
+    const types = new Set(App.data.exercises.map(e => e.type));
+    const missing = Object.keys(EXERCISE_TYPES).filter(t => !types.has(t)).map(t => EXERCISE_TYPES[t].toLowerCase());
+    return section('Exercícios', `
+        ${addButton('Adicionar exercício', 'exercise')}
+        ${App.data.exercises.length
+            ? App.data.exercises.map(e => infoCard('exercise', ICONS.exercise, e.name, `${EXERCISE_TYPES[e.type]} • ${e.duration} min • ${daysLabel(e.days)}`, editAttrs('exercise', e.id))).join('')
+            : emptyState('Nenhum exercício', 'Use as sugestões prontas ao adicionar.')}
+        ${tip('exercise', ICONS.exercise, `${sessions} ${sessions === 1 ? 'dia ativo' : 'dias ativos'} nos últimos 7 dias`,
+            missing.length && App.data.exercises.length ? `Para um treino completo, inclua também: ${missing.join(', ')}.` : 'Treino multicomponente: força, equilíbrio, marcha e flexibilidade.')}
+    `);
 }
 
 function renderCaregiverVisits() {
-    const container = document.getElementById('caregiver-visits-list');
-    const visits = upcomingVisits().slice(0, 3);
-    container.innerHTML = visits.length
-        ? visits.map(v => infoCard('visit', ICONS.calendar, formatDate(v.date), `${v.description || 'Visita'}${v.time ? ' • ' + v.time : ''}`, `openEditScreen('visit', ${v.id})`)).join('')
-        : emptyState('', 'Nenhuma visita agendada', true);
+    const visits = [...App.data.visits].sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
+    const today = dateKey();
+    return section('Visitas e consultas', addButton('Agendar visita', 'visit') + (visits.length
+        ? visits.map(v => infoCard('visit', ICONS.calendar, formatDate(v.date) + (v.date < today ? ' (passada)' : ''), `${v.description || 'Visita'}${v.time ? ' • ' + v.time : ''}`, editAttrs('visit', v.id))).join('')
+        : emptyState('Nenhuma visita', 'Agende consultas e visitas de acompanhamento.')));
+}
+
+function renderCaregiverDiet() {
+    if (App.dietDay === null) App.dietDay = dietIndexFor(new Date());
+    const protein = proteinGoal();
+    const diet = App.data.diet[App.dietDay] || {};
+    return section('Dieta da semana', `
+        <div class="scroll-row" id="diet-days">
+            ${DIET_DAYS.map((day, i) => `<button type="button" class="day-tab ${i === App.dietDay ? 'active' : ''}" data-day="${i}">${day.slice(0, 3)}</button>`).join('')}
+        </div>
+        <div class="card">
+            ${MEALS.map(m => `
+                <div class="form-group">
+                    <label class="form-label" for="diet-${m.key}">${m.label}</label>
+                    <textarea class="form-input form-textarea" id="diet-${m.key}" data-meal="${m.key}" placeholder="O que comer no ${m.label.toLowerCase()}">${escapeHtml(diet[m.key] || '')}</textarea>
+                </div>`).join('')}
+            <button type="button" class="btn btn-secondary btn-block" id="btn-diet-copy">Usar este cardápio a semana toda</button>
+        </div>
+        ${tip('food', ICONS.food, 'Inclua proteína em todas as refeições', `${protein ? `Meta: ${protein.min}–${protein.max} g/dia. ` : ''}Ex: ovos, leite, iogurte, queijo, feijão, frango, peixe.`)}
+    `, 'Salva automaticamente');
+}
+
+function bindDietEditor(root) {
+    const readDay = () => {
+        const entry = {};
+        MEALS.forEach(m => { entry[m.key] = val(`diet-${m.key}`); });
+        App.data.diet[App.dietDay] = entry;
+        saveToStorage();
+    };
+
+    root.querySelectorAll('[data-meal]').forEach(field => field.addEventListener('input', readDay));
+    root.querySelectorAll('#diet-days [data-day]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            readDay();
+            App.dietDay = Number(btn.dataset.day);
+            const scroll = document.getElementById('diet-days').scrollLeft;
+            renderCaregiver();
+            document.getElementById('diet-days').scrollLeft = scroll;
+        });
+    });
+    document.getElementById('btn-diet-copy').addEventListener('click', () => {
+        readDay();
+        const source = App.data.diet[App.dietDay];
+        showConfirm('Copiar para a semana', `O cardápio de ${DIET_DAYS[App.dietDay].toLowerCase()} será usado em todos os dias.`, () => {
+            DIET_DAYS.forEach((_, i) => { App.data.diet[i] = { ...source }; });
+            saveToStorage();
+            showToast('Cardápio copiado!', 'success');
+        }, 'Copiar');
+    });
 }
 
 function upcomingVisits() {
@@ -1227,7 +1279,7 @@ function initSettings() {
     document.getElementById('settings-elderly-name').addEventListener('click', () => editName('elderlyName', 'Nome do Idoso'));
     document.getElementById('settings-caregiver-name').addEventListener('click', () => editName('caregiverName', 'Nome do Cuidador'));
 
-    document.querySelectorAll('.device-option').forEach(btn => {
+    document.querySelectorAll('[data-device]').forEach(btn => {
         btn.addEventListener('click', () => {
             App.settings.deviceOwner = btn.dataset.device;
             saveSettings('Configuração salva!');
@@ -1414,7 +1466,6 @@ function resizeImage(file, size) {
 function initEmergencyScreen() {
     document.getElementById('btn-call-emergency').addEventListener('click', () => callNumber(App.settings.emergencyPhone || '192'));
     document.getElementById('btn-call-caregiver').addEventListener('click', () => callNumber(App.settings.caregiverPhone));
-    document.getElementById('btn-register-fall').addEventListener('click', registerFall);
 }
 
 function callNumber(number) {
@@ -1424,49 +1475,22 @@ function callNumber(number) {
 
 // ==================== TELA DE EDIÇÃO ====================
 const EDIT_TITLES = {
-    'medication': id => id ? 'Editar Medicamento' : 'Novo Medicamento',
-    'exercise': id => id ? 'Editar Exercício' : 'Novo Exercício',
-    'visit': id => id ? 'Editar Visita' : 'Nova Visita',
-    'diet': () => 'Dieta da Semana',
-    'medication-list': () => 'Medicamentos',
-    'exercise-list': () => 'Exercícios',
-    'visit-list': () => 'Visitas'
+    medication: id => id ? 'Editar Remédio' : 'Novo Remédio',
+    exercise: id => id ? 'Editar Exercício' : 'Novo Exercício',
+    visit: id => id ? 'Editar Visita' : 'Nova Visita'
 };
 
 function openEditScreen(type, id) {
-    const onEdit = document.getElementById('screen-edit').classList.contains('active');
-    if (!onEdit) App.editStack = [];
-    App.editStack.push({ type, id });
-    renderEdit(type, id);
-    if (!onEdit) showScreen('screen-edit');
-    else document.querySelector('#screen-edit .screen-content').scrollTop = 0;
-}
-
-function renderEdit(type, id) {
     setText('edit-screen-title', EDIT_TITLES[type](id));
     const container = document.getElementById('edit-form-container');
-    const renderers = {
-        'medication': renderMedicationForm,
-        'exercise': renderExerciseForm,
-        'visit': renderVisitForm,
-        'diet': renderDietForm,
-        'medication-list': renderMedicationList,
-        'exercise-list': renderExerciseList,
-        'visit-list': renderVisitList
-    };
-    renderers[type](container, id);
+    ({ medication: renderMedicationForm, exercise: renderExerciseForm, visit: renderVisitForm })[type](container, id);
+    showScreen('screen-edit');
 }
 
 function finishEdit(message) {
     saveToStorage();
     showToast(message, 'success');
-    if (App.editStack.length > 1) {
-        App.editStack.pop();
-        const prev = App.editStack[App.editStack.length - 1];
-        renderEdit(prev.type, prev.id);
-    } else {
-        goBack();
-    }
+    goBack();
 }
 
 function confirmDelete(title, message, collection, id, toast) {
@@ -1476,13 +1500,18 @@ function confirmDelete(title, message, collection, id, toast) {
     }, 'Excluir');
 }
 
-function formActions(id, saveLabel, deleteLabel, deleteFn) {
+function formActions(id, saveLabel, deleteLabel) {
     return `
         <div class="form-actions">
-            <button type="submit" class="btn btn-primary btn-block">${id ? 'Salvar Alterações' : saveLabel}</button>
-            ${id ? `<button type="button" class="btn btn-danger btn-block" onclick="${deleteFn}(${id})">${deleteLabel}</button>` : ''}
+            <button type="submit" class="btn btn-primary btn-block">${id ? 'Salvar alterações' : saveLabel}</button>
+            ${id ? `<button type="button" class="btn btn-danger btn-block" data-delete>${deleteLabel}</button>` : ''}
         </div>
     `;
+}
+
+function bindDelete(container, handler) {
+    const btn = container.querySelector('[data-delete]');
+    if (btn) btn.addEventListener('click', handler);
 }
 
 function renderMedicationForm(container, id) {
@@ -1490,7 +1519,7 @@ function renderMedicationForm(container, id) {
     container.innerHTML = `
         <form id="form-medication" novalidate>
             <div class="form-group">
-                <label class="form-label" for="med-name">Nome do Medicamento *</label>
+                <label class="form-label" for="med-name">Nome do remédio *</label>
                 <input type="text" class="form-input" id="med-name" value="${med ? escapeHtml(med.name) : ''}" placeholder="Ex: Losartana">
             </div>
             <div class="form-group">
@@ -1514,9 +1543,10 @@ function renderMedicationForm(container, id) {
                 <textarea class="form-input form-textarea" id="med-instructions" placeholder="Ex: Tomar com água, depois do café">${med ? escapeHtml(med.instructions || '') : ''}</textarea>
                 <p class="form-hint">Vitamina D e cálcio também podem ser cadastrados aqui, se prescritos pelo médico.</p>
             </div>
-            ${formActions(id, 'Adicionar Medicamento', 'Excluir Medicamento', 'deleteMedication')}
+            ${formActions(id, 'Adicionar remédio', 'Excluir remédio')}
         </form>
     `;
+    bindDelete(container, () => confirmDelete('Excluir remédio', 'Tem certeza que deseja excluir este remédio?', 'medications', id, 'Remédio excluído'));
     document.getElementById('form-medication').addEventListener('submit', e => {
         e.preventDefault();
         const item = {
@@ -1529,12 +1559,8 @@ function renderMedicationForm(container, id) {
         };
         if (!item.name || !item.dosage) return showToast('Preencha nome e dosagem', 'error');
         upsert('medications', item);
-        finishEdit(id ? 'Medicamento atualizado!' : 'Medicamento adicionado!');
+        finishEdit(id ? 'Remédio atualizado!' : 'Remédio adicionado!');
     });
-}
-
-function deleteMedication(id) {
-    confirmDelete('Excluir Medicamento', 'Tem certeza que deseja excluir este medicamento?', 'medications', id, 'Medicamento excluído');
 }
 
 function renderExerciseForm(container, id) {
@@ -1543,7 +1569,7 @@ function renderExerciseForm(container, id) {
     container.innerHTML = `
         ${!ex ? `
             <div class="form-label">Sugestões (programa multicomponente)</div>
-            <div class="preset-list">
+            <div class="scroll-row">
                 ${EXERCISE_PRESETS.map((p, i) => `
                     <button type="button" class="preset-chip" data-preset="${i}">
                         <strong>${p.name}</strong><span>${EXERCISE_TYPES[p.type]} • ${p.duration} min</span>
@@ -1551,7 +1577,7 @@ function renderExerciseForm(container, id) {
             </div>` : ''}
         <form id="form-exercise" novalidate>
             <div class="form-group">
-                <label class="form-label" for="ex-name">Nome do Exercício *</label>
+                <label class="form-label" for="ex-name">Nome do exercício *</label>
                 <input type="text" class="form-input" id="ex-name" value="${ex ? escapeHtml(ex.name) : ''}" placeholder="Ex: Caminhada leve">
             </div>
             <div class="form-group">
@@ -1580,10 +1606,11 @@ function renderExerciseForm(container, id) {
                 <label class="form-label" for="ex-description">Como fazer</label>
                 <textarea class="form-input form-textarea" id="ex-description" placeholder="Descreva o exercício">${ex ? escapeHtml(ex.description || '') : ''}</textarea>
             </div>
-            ${formActions(id, 'Adicionar Exercício', 'Excluir Exercício', 'deleteExercise')}
+            ${formActions(id, 'Adicionar exercício', 'Excluir exercício')}
         </form>
     `;
 
+    bindDelete(container, () => confirmDelete('Excluir exercício', 'Tem certeza que deseja excluir este exercício?', 'exercises', id, 'Exercício excluído'));
     container.querySelectorAll('.day-chip').forEach(chip => chip.addEventListener('click', () => chip.classList.toggle('selected')));
     container.querySelectorAll('[data-preset]').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1592,6 +1619,7 @@ function renderExerciseForm(container, id) {
             document.getElementById('ex-type').value = p.type;
             document.getElementById('ex-duration').value = p.duration;
             document.getElementById('ex-description').value = p.description;
+            container.querySelectorAll('[data-preset]').forEach(b => b.classList.toggle('selected', b === btn));
         });
     });
 
@@ -1614,10 +1642,6 @@ function renderExerciseForm(container, id) {
     });
 }
 
-function deleteExercise(id) {
-    confirmDelete('Excluir Exercício', 'Tem certeza que deseja excluir este exercício?', 'exercises', id, 'Exercício excluído');
-}
-
 function renderVisitForm(container, id) {
     const visit = id ? App.data.visits.find(v => v.id === id) : null;
     container.innerHTML = `
@@ -1634,9 +1658,10 @@ function renderVisitForm(container, id) {
                 <label class="form-label" for="visit-description">Descrição</label>
                 <textarea class="form-input form-textarea" id="visit-description" placeholder="Ex: Consulta com geriatra, visita da filha">${visit ? escapeHtml(visit.description || '') : ''}</textarea>
             </div>
-            ${formActions(id, 'Agendar Visita', 'Cancelar Visita', 'deleteVisit')}
+            ${formActions(id, 'Agendar visita', 'Cancelar visita')}
         </form>
     `;
+    bindDelete(container, () => confirmDelete('Cancelar visita', 'Tem certeza que deseja cancelar esta visita?', 'visits', id, 'Visita cancelada'));
     document.getElementById('form-visit').addEventListener('submit', e => {
         e.preventDefault();
         const item = { id: id || Date.now(), date: val('visit-date'), time: val('visit-time'), description: val('visit-description') };
@@ -1644,113 +1669,6 @@ function renderVisitForm(container, id) {
         upsert('visits', item);
         finishEdit(id ? 'Visita atualizada!' : 'Visita agendada!');
     });
-}
-
-function deleteVisit(id) {
-    confirmDelete('Cancelar Visita', 'Tem certeza que deseja cancelar esta visita?', 'visits', id, 'Visita cancelada');
-}
-
-function renderDietForm(container) {
-    let selectedDay = dietIndexFor(new Date());
-    const protein = proteinGoal();
-
-    container.innerHTML = `
-        <div class="tip-card food">${ICONS.food}<div>
-            <strong>Inclua proteína em todas as refeições</strong>
-            ${protein ? `Meta: ${protein.min}–${protein.max} g/dia. ` : ''}Ex: ovos, leite, iogurte, queijo, feijão, frango, peixe.
-        </div></div>
-        <div class="preset-list" id="diet-days">
-            ${DIET_DAYS.map((day, i) => `<button type="button" class="category-pill ${i === selectedDay ? 'active' : ''}" data-day="${i}"><span class="category-pill-text">${day.slice(0, 3)}</span></button>`).join('')}
-        </div>
-        <form id="form-diet" novalidate>
-            <div id="diet-day-content"></div>
-            <div class="form-actions">
-                <button type="button" class="btn btn-outline btn-block" id="btn-diet-copy">Copiar este dia para a semana toda</button>
-                <button type="submit" class="btn btn-primary btn-block">Salvar Dieta</button>
-            </div>
-        </form>
-    `;
-
-    const readDay = () => {
-        const entry = {};
-        MEALS.forEach(m => { entry[m.key] = val(`diet-${m.key}`); });
-        App.data.diet[selectedDay] = entry;
-    };
-
-    const renderDay = () => {
-        const diet = App.data.diet[selectedDay] || {};
-        document.getElementById('diet-day-content').innerHTML = MEALS.map(m => `
-            <div class="form-group">
-                <label class="form-label" for="diet-${m.key}">${m.label}</label>
-                <textarea class="form-input form-textarea" id="diet-${m.key}" placeholder="O que comer no ${m.label.toLowerCase()}">${escapeHtml(diet[m.key] || '')}</textarea>
-            </div>`).join('');
-    };
-
-    renderDay();
-
-    container.querySelectorAll('#diet-days .category-pill').forEach(pill => {
-        pill.addEventListener('click', () => {
-            readDay();
-            container.querySelectorAll('#diet-days .category-pill').forEach(p => p.classList.remove('active'));
-            pill.classList.add('active');
-            selectedDay = Number(pill.dataset.day);
-            renderDay();
-        });
-    });
-
-    document.getElementById('btn-diet-copy').addEventListener('click', () => {
-        readDay();
-        const source = App.data.diet[selectedDay];
-        showConfirm('Copiar para a semana', `O cardápio de ${DIET_DAYS[selectedDay].toLowerCase()} será usado em todos os dias.`, () => {
-            DIET_DAYS.forEach((_, i) => { App.data.diet[i] = { ...source }; });
-            saveToStorage();
-            showToast('Cardápio copiado!', 'success');
-        }, 'Copiar');
-    });
-
-    document.getElementById('form-diet').addEventListener('submit', e => {
-        e.preventDefault();
-        readDay();
-        finishEdit('Dieta salva!');
-    });
-}
-
-function listAddButton(label, type) {
-    return `<button class="cta-card" onclick="openEditScreen('${type}', null)">
-        <span class="quick-icon" style="background: var(--color-primary-light); color: var(--color-primary); width: 44px; height: 44px;">${ICONS.plus}</span>
-        <span class="task-title">${label}</span>
-    </button>`;
-}
-
-function renderMedicationList(container) {
-    container.innerHTML = listAddButton('Adicionar medicamento', 'medication') + (App.data.medications.length
-        ? [...App.data.medications].sort((a, b) => (a.time || '99').localeCompare(b.time || '99'))
-            .map(m => infoCard('medication', ICONS.pill, m.name, `${m.dosage}${m.time ? ' • ' + m.time : ''} • ${frequencyLabel(m.frequency)}`, `openEditScreen('medication', ${m.id})`)).join('')
-        : emptyState('Nenhum medicamento', 'Cadastre os remédios para o idoso acompanhar.'));
-}
-
-function renderExerciseList(container) {
-    const sessions = weeklyExerciseSessions();
-    const types = new Set(App.data.exercises.map(e => e.type));
-    const missing = Object.keys(EXERCISE_TYPES).filter(t => !types.has(t)).map(t => EXERCISE_TYPES[t].toLowerCase());
-    container.innerHTML = `
-        <div class="tip-card exercise">${ICONS.exercise}<div>
-            <strong>${sessions} ${sessions === 1 ? 'dia ativo' : 'dias ativos'} nos últimos 7 dias</strong>
-            ${missing.length && App.data.exercises.length ? `Para um treino completo, inclua também: ${missing.join(', ')}.` : 'Treino multicomponente: força, equilíbrio, marcha e flexibilidade.'}
-        </div></div>
-        ${listAddButton('Adicionar exercício', 'exercise')}
-        ${App.data.exercises.length
-            ? App.data.exercises.map(e => infoCard('exercise', ICONS.exercise, e.name, `${EXERCISE_TYPES[e.type]} • ${e.duration} min • ${daysLabel(e.days)}`, `openEditScreen('exercise', ${e.id})`)).join('')
-            : emptyState('Nenhum exercício', 'Use as sugestões prontas ao adicionar.')}
-    `;
-}
-
-function renderVisitList(container) {
-    const visits = [...App.data.visits].sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
-    const today = dateKey();
-    container.innerHTML = listAddButton('Agendar visita', 'visit') + (visits.length
-        ? visits.map(v => infoCard('visit', ICONS.calendar, formatDate(v.date) + (v.date < today ? ' (passada)' : ''), `${v.description || 'Visita'}${v.time ? ' • ' + v.time : ''}`, `openEditScreen('visit', ${v.id})`)).join('')
-        : emptyState('Nenhuma visita', 'Agende consultas e visitas de acompanhamento.'));
 }
 
 // ==================== UTILITÁRIOS ====================
@@ -1795,12 +1713,11 @@ function formatLiters(ml) {
     return (ml / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 2 }) + ' L';
 }
 
-function emptyState(title, text, compact = false) {
+function emptyState(title, text) {
     return `
-        <div class="empty-state" ${compact ? 'style="padding: var(--spacing-md);"' : ''}>
-            ${!compact ? `<div class="empty-state-icon">${ICONS.check}</div>` : ''}
+        <div class="empty-state">
             ${title ? `<div class="empty-state-title">${escapeHtml(title)}</div>` : ''}
-            <div class="empty-state-text">${escapeHtml(text)}</div>
+            <div>${escapeHtml(text)}</div>
         </div>
     `;
 }

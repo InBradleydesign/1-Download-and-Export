@@ -80,7 +80,7 @@
                             <div class="profile-name" id="elderly-name">Idoso</div>
                             <div class="profile-role" id="elderly-role">Ver minhas tarefas do dia</div>
                         </div>
-                        <div class="profile-arrow">
+                        <div class="chevron">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
                         </div>
                     </button>
@@ -94,7 +94,7 @@
                                 Gerenciar cuidados
                             </div>
                         </div>
-                        <div class="profile-arrow">
+                        <div class="chevron">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
                         </div>
                     </button>
@@ -111,39 +111,14 @@
         <div id="screen-elderly" class="screen">
             <header class="screen-header">
                 <div class="header-top">
-                    <div>
+                    <div class="header-text">
                         <div class="header-date" id="elderly-date"></div>
                         <div class="header-greeting"><span id="elderly-salutation">Olá</span>, <span class="accent" id="elderly-greeting-name">Idoso</span>!</div>
                     </div>
                     <div class="header-icons">
-                        <button class="header-icon-btn" id="btn-elderly-home" aria-label="Voltar ao início">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                        </button>
-                        <div class="header-avatar" id="elderly-header-avatar"></div>
+                        <button class="sos-btn" id="btn-emergency" aria-label="Emergência"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg><span>SOS</span></button>
+                        <button class="header-icon-btn" data-exit aria-label="Sair"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
                     </div>
-                </div>
-
-                <div class="categories-scroll" role="tablist">
-                    <button class="category-pill all active" data-category="all" role="tab">
-                        <span class="category-pill-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
-                        <span class="category-pill-text">Hoje</span>
-                    </button>
-                    <button class="category-pill medication" data-category="medication" role="tab">
-                        <span class="category-pill-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg></span>
-                        <span class="category-pill-text">Remédios</span>
-                    </button>
-                    <button class="category-pill exercise" data-category="exercise" role="tab">
-                        <span class="category-pill-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="3"/><path d="M12 22V8"/><path d="m5 12 7 3 7-3"/></svg></span>
-                        <span class="category-pill-text">Exercícios</span>
-                    </button>
-                    <button class="category-pill food" data-category="food" role="tab">
-                        <span class="category-pill-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg></span>
-                        <span class="category-pill-text">Alimentação</span>
-                    </button>
-                    <button class="category-pill health" data-category="health" role="tab">
-                        <span class="category-pill-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></span>
-                        <span class="category-pill-text">Como Estou</span>
-                    </button>
                 </div>
             </header>
 
@@ -160,16 +135,16 @@
                     <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg></span>
                     <span class="nav-label">Remédios</span>
                 </button>
-                <button class="nav-item emergency" id="btn-emergency" aria-label="Emergência SOS">
-                    <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span>
-                    <span class="nav-label">SOS</span>
+                <button class="nav-item" data-category="exercise">
+                    <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="3"/><path d="M12 22V8"/><path d="m5 12 7 3 7-3"/></svg></span>
+                    <span class="nav-label">Exercícios</span>
                 </button>
                 <button class="nav-item" data-category="food">
                     <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg></span>
-                    <span class="nav-label">Dieta</span>
+                    <span class="nav-label">Comida</span>
                 </button>
                 <button class="nav-item" data-category="health">
-                    <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/></svg></span>
+                    <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></span>
                     <span class="nav-label">Humor</span>
                 </button>
             </nav>
@@ -179,99 +154,41 @@
         <div id="screen-caregiver" class="screen">
             <header class="screen-header">
                 <div class="header-top">
-                    <div>
+                    <div class="header-text">
                         <div class="header-date">Acompanhando <span id="caregiver-elderly-name">Idoso</span></div>
                         <div class="header-greeting">Olá, <span class="accent" id="caregiver-greeting-name">Cuidador</span>!</div>
                     </div>
                     <div class="header-icons">
-                        <button class="header-icon-btn" id="btn-caregiver-settings" aria-label="Configurações">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                        </button>
-                        <button class="header-icon-btn" id="btn-caregiver-home" aria-label="Sair para o início">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                        </button>
+                        <button class="header-icon-btn" id="btn-caregiver-settings" aria-label="Configurações"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+                        <button class="header-icon-btn" data-exit aria-label="Sair"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
                     </div>
                 </div>
             </header>
 
             <div class="screen-content" id="caregiver-content">
-                <div id="caregiver-alerts"></div>
-
-                <section class="section section-first">
-                    <div class="section-header">
-                        <h2 class="section-title">Ações Rápidas</h2>
-                    </div>
-                    <div class="quick-grid">
-                        <button class="quick-card" id="btn-add-medication">
-                            <span class="quick-icon medication"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
-                            <span class="quick-label">Medicamento</span>
-                        </button>
-                        <button class="quick-card" id="btn-add-exercise">
-                            <span class="quick-icon exercise"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
-                            <span class="quick-label">Exercício</span>
-                        </button>
-                        <button class="quick-card" id="btn-add-visit">
-                            <span class="quick-icon visit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
-                            <span class="quick-label">Visita</span>
-                        </button>
-                        <button class="quick-card" id="btn-edit-diet">
-                            <span class="quick-icon food"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span>
-                            <span class="quick-label">Dieta</span>
-                        </button>
-                    </div>
-                </section>
-
-                <section class="section">
-                    <div class="section-header">
-                        <h2 class="section-title">Progresso de Hoje</h2>
-                    </div>
-                    <div id="caregiver-progress"></div>
-                </section>
-
-                <section class="section">
-                    <div class="section-header">
-                        <h2 class="section-title">Últimos 7 Dias</h2>
-                    </div>
-                    <div id="caregiver-week"></div>
-                </section>
-
-                <section class="section">
-                    <div class="section-header">
-                        <h2 class="section-title">Medicamentos</h2>
-                        <button class="section-link" id="btn-view-all-meds">Ver todos</button>
-                    </div>
-                    <div id="caregiver-meds-list"></div>
-                </section>
-
-                <section class="section">
-                    <div class="section-header">
-                        <h2 class="section-title">Próximas Visitas</h2>
-                        <button class="section-link" id="btn-view-all-visits">Ver todas</button>
-                    </div>
-                    <div id="caregiver-visits-list"></div>
-                </section>
+                <div id="caregiver-body"></div>
             </div>
 
             <nav class="bottom-nav" id="caregiver-nav">
-                <button class="nav-item active" data-action="top">
-                    <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span>
-                    <span class="nav-label">Início</span>
+                <button class="nav-item active" data-tab="panel">
+                    <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
+                    <span class="nav-label">Painel</span>
                 </button>
-                <button class="nav-item" data-action="medication-list">
+                <button class="nav-item" data-tab="medication">
                     <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg></span>
                     <span class="nav-label">Remédios</span>
                 </button>
-                <button class="nav-item" data-action="visit-list">
-                    <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
-                    <span class="nav-label">Visitas</span>
-                </button>
-                <button class="nav-item" data-action="exercise-list">
+                <button class="nav-item" data-tab="exercise">
                     <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="3"/><path d="M12 22V8"/><path d="m5 12 7 3 7-3"/></svg></span>
                     <span class="nav-label">Exercícios</span>
                 </button>
-                <button class="nav-item" data-action="settings">
-                    <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v3M12 20v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M1 12h3M20 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg></span>
-                    <span class="nav-label">Config</span>
+                <button class="nav-item" data-tab="diet">
+                    <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg></span>
+                    <span class="nav-label">Dieta</span>
+                </button>
+                <button class="nav-item" data-tab="visit">
+                    <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+                    <span class="nav-label">Visitas</span>
                 </button>
             </nav>
         </div>
@@ -279,7 +196,7 @@
         <!-- ==================== TELA DE CONFIGURAÇÕES ==================== -->
         <div id="screen-settings" class="screen">
             <header class="screen-header">
-                <div class="header-top header-top-center">
+                <div class="header-top">
                     <button class="back-button" data-back aria-label="Voltar">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
                     </button>
@@ -288,209 +205,145 @@
                 </div>
             </header>
 
-            <div class="screen-content settings-content">
-                <div class="settings-list">
-                    <div class="settings-group">
-                        <div class="settings-group-title">Perfis</div>
-
+            <div class="screen-content">
+                <div class="settings-group">
+                    <div class="settings-group-title">Perfis</div>
+                    <div class="settings-card">
                         <div class="settings-item">
-                            <button class="settings-item-left settings-tap" id="settings-elderly-name">
+                            <button class="settings-item-left" id="settings-elderly-name">
                                 <span class="settings-avatar elderly" id="settings-elderly-avatar"></span>
-                                <span>
-                                    <span class="settings-item-text">Nome do Idoso</span>
-                                    <span class="settings-item-desc" id="display-elderly-name">Idoso</span>
+                                <span class="settings-item-body">
+                                    <span class="settings-item-desc">Idoso</span>
+                                    <span class="settings-item-text" id="display-elderly-name">Idoso</span>
                                 </span>
                             </button>
                             <button class="photo-btn" data-photo="elderly" aria-label="Alterar foto do idoso">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
                             </button>
                         </div>
-
                         <div class="settings-item">
-                            <button class="settings-item-left settings-tap" id="settings-caregiver-name">
+                            <button class="settings-item-left" id="settings-caregiver-name">
                                 <span class="settings-avatar" id="settings-caregiver-avatar"></span>
-                                <span>
-                                    <span class="settings-item-text">Nome do Cuidador</span>
-                                    <span class="settings-item-desc" id="display-caregiver-name">Cuidador</span>
+                                <span class="settings-item-body">
+                                    <span class="settings-item-desc">Cuidador</span>
+                                    <span class="settings-item-text" id="display-caregiver-name">Cuidador</span>
                                 </span>
                             </button>
                             <button class="photo-btn" data-photo="caregiver" aria-label="Alterar foto do cuidador">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
                             </button>
                         </div>
-                    </div>
-
-                    <div class="settings-group">
-                        <div class="settings-group-title">Dispositivo</div>
                         <div class="settings-item settings-item-stack">
-                            <div class="settings-item-left">
-                                <div class="settings-item-icon">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-                                </div>
-                                <div>
-                                    <div class="settings-item-text">Este celular é</div>
-                                    <div class="settings-item-desc" id="device-desc"></div>
-                                </div>
+                            <div class="settings-item-body">
+                                <span class="settings-item-text">Este celular é</span>
+                                <span class="settings-item-desc" id="device-desc"></span>
                             </div>
-                            <div class="device-selector">
-                                <button class="device-option" data-device="elderly">Do idoso</button>
-                                <button class="device-option" data-device="caregiver">Do cuidador</button>
+                            <div class="segmented">
+                                <button class="segmented-option" data-device="elderly">Do idoso</button>
+                                <button class="segmented-option" data-device="caregiver">Do cuidador</button>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="settings-group">
-                        <div class="settings-group-title">Saúde do Idoso</div>
-
-                        <button class="settings-item settings-tap" id="settings-weight">
-                            <span class="settings-item-left">
-                                <span class="settings-item-icon" style="background: var(--color-food);">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--color-food-icon);"><path d="M6 3h12l3 18H3z"/><path d="M12 9v4"/></svg>
-                                </span>
-                                <span>
-                                    <span class="settings-item-text">Peso</span>
-                                    <span class="settings-item-desc" id="display-weight">Não informado</span>
-                                </span>
+                <div class="settings-group">
+                    <div class="settings-group-title">Saúde</div>
+                    <div class="settings-card">
+                        <button class="settings-item" id="settings-weight">
+                            <span class="settings-item-icon food"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12l3 18H3z"/><path d="M12 9v4"/></svg></span>
+                            <span class="settings-item-left settings-item-body">
+                                <span class="settings-item-text">Peso</span>
+                                <span class="settings-item-desc" id="display-weight">Não informado</span>
                             </span>
-                            <span class="profile-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></span>
+                            <span class="chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></span>
                         </button>
-
                         <div class="settings-item">
-                            <div class="settings-item-left">
-                                <div class="settings-item-icon" style="background: var(--color-health);">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--color-health-icon);"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-                                </div>
-                                <div>
-                                    <div class="settings-item-text">Fragilidade ou doença crônica</div>
-                                    <div class="settings-item-desc">Aumenta a meta de proteína</div>
-                                </div>
-                            </div>
+                            <span class="settings-item-icon health"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></span>
+                            <span class="settings-item-left settings-item-body">
+                                <span class="settings-item-text">Fragilidade ou doença crônica</span>
+                                <span class="settings-item-desc">Aumenta a meta de proteína</span>
+                            </span>
                             <button class="toggle" id="toggle-frail" role="switch" aria-label="Fragilidade ou doença crônica"></button>
                         </div>
-
                         <div class="settings-item">
-                            <div class="settings-item-left">
-                                <div class="settings-item-icon" style="background: var(--color-water);">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--color-water-icon);"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
-                                </div>
-                                <div>
-                                    <div class="settings-item-text">Meta de água</div>
-                                    <div class="settings-item-desc" id="display-water-ml">2 litros por dia</div>
-                                </div>
-                            </div>
-                            <div class="font-size-control">
-                                <button class="font-size-btn" id="btn-water-decrease" aria-label="Diminuir meta de água">−</button>
-                                <span class="font-size-value" id="water-goal-value">8</span>
-                                <button class="font-size-btn" id="btn-water-increase" aria-label="Aumentar meta de água">+</button>
+                            <span class="settings-item-icon water"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg></span>
+                            <span class="settings-item-left settings-item-body">
+                                <span class="settings-item-text">Meta de água</span>
+                                <span class="settings-item-desc" id="display-water-ml">2 litros por dia</span>
+                            </span>
+                            <div class="stepper">
+                                <button class="stepper-btn" id="btn-water-decrease" aria-label="Diminuir meta de água">−</button>
+                                <span class="stepper-value" id="water-goal-value">8</span>
+                                <button class="stepper-btn" id="btn-water-increase" aria-label="Aumentar meta de água">+</button>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="settings-group">
-                        <div class="settings-group-title">Contatos de Emergência</div>
-
-                        <button class="settings-item settings-tap" id="settings-emergency-phone">
-                            <span class="settings-item-left">
-                                <span class="settings-item-icon" style="background: var(--color-emergency);">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--color-emergency-icon);"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                                </span>
-                                <span>
-                                    <span class="settings-item-text">Telefone de Emergência</span>
-                                    <span class="settings-item-desc" id="display-emergency-phone">192</span>
-                                </span>
+                <div class="settings-group">
+                    <div class="settings-group-title">Contatos do SOS</div>
+                    <div class="settings-card">
+                        <button class="settings-item" id="settings-emergency-phone">
+                            <span class="settings-item-icon danger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span>
+                            <span class="settings-item-left settings-item-body">
+                                <span class="settings-item-text">Emergência</span>
+                                <span class="settings-item-desc" id="display-emergency-phone">192</span>
                             </span>
-                            <span class="profile-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></span>
+                            <span class="chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></span>
                         </button>
-
-                        <button class="settings-item settings-tap" id="settings-caregiver-phone">
-                            <span class="settings-item-left">
-                                <span class="settings-item-icon" style="background: var(--color-primary-light);">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--color-primary);"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-                                </span>
-                                <span>
-                                    <span class="settings-item-text">Telefone do Cuidador</span>
-                                    <span class="settings-item-desc" id="display-caregiver-phone">Não informado</span>
-                                </span>
+                        <button class="settings-item" id="settings-caregiver-phone">
+                            <span class="settings-item-icon primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></span>
+                            <span class="settings-item-left settings-item-body">
+                                <span class="settings-item-text">Cuidador</span>
+                                <span class="settings-item-desc" id="display-caregiver-phone">Não informado</span>
                             </span>
-                            <span class="profile-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></span>
+                            <span class="chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></span>
                         </button>
                     </div>
+                </div>
 
-                    <div class="settings-group">
-                        <div class="settings-group-title">Aparência e Acessibilidade</div>
-
+                <div class="settings-group">
+                    <div class="settings-group-title">Aparência</div>
+                    <div class="settings-card">
                         <div class="settings-item">
-                            <div class="settings-item-left">
-                                <div class="settings-item-icon">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>
-                                </div>
-                                <div class="settings-item-text">Tamanho da Fonte</div>
-                            </div>
-                            <div class="font-size-control">
-                                <button class="font-size-btn" id="btn-font-decrease" aria-label="Diminuir fonte">−</button>
-                                <span class="font-size-value" id="font-size-value">100%</span>
-                                <button class="font-size-btn" id="btn-font-increase" aria-label="Aumentar fonte">+</button>
+                            <span class="settings-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg></span>
+                            <span class="settings-item-left settings-item-text">Tamanho da letra</span>
+                            <div class="stepper">
+                                <button class="stepper-btn" id="btn-font-decrease" aria-label="Diminuir letra">−</button>
+                                <span class="stepper-value" id="font-size-value">100%</span>
+                                <button class="stepper-btn" id="btn-font-increase" aria-label="Aumentar letra">+</button>
                             </div>
                         </div>
-
                         <div class="settings-item">
-                            <div class="settings-item-left">
-                                <div class="settings-item-icon">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 0 0 20z" fill="currentColor"/></svg>
-                                </div>
-                                <div class="settings-item-text">Alto Contraste</div>
-                            </div>
+                            <span class="settings-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 0 0 20z" fill="currentColor"/></svg></span>
+                            <span class="settings-item-left settings-item-text">Alto contraste</span>
                             <button class="toggle" id="toggle-contrast" role="switch" aria-label="Alto contraste"></button>
                         </div>
-
                         <div class="settings-item">
-                            <div class="settings-item-left">
-                                <div class="settings-item-icon">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                                </div>
-                                <div class="settings-item-text">Animações</div>
-                            </div>
+                            <span class="settings-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
+                            <span class="settings-item-left settings-item-text">Animações</span>
                             <button class="toggle" id="toggle-animations" role="switch" aria-label="Animações"></button>
                         </div>
                     </div>
+                </div>
 
-                    <div class="settings-group">
-                        <div class="settings-group-title">Segurança e Privacidade</div>
-
-                        <button class="settings-item settings-tap" id="settings-change-password">
-                            <span class="settings-item-left">
-                                <span class="settings-item-icon">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                                </span>
-                                <span class="settings-item-text">Alterar Senha do Cuidador</span>
-                            </span>
-                            <span class="profile-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></span>
+                <div class="settings-group">
+                    <div class="settings-group-title">Segurança</div>
+                    <div class="settings-card">
+                        <button class="settings-item" id="settings-change-password">
+                            <span class="settings-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+                            <span class="settings-item-left settings-item-text">Alterar senha do cuidador</span>
+                            <span class="chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></span>
                         </button>
-
-                        <div class="settings-item">
-                            <div class="settings-item-left">
-                                <div class="settings-item-icon" style="background: var(--color-exercise);">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--color-exercise-icon);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                                </div>
-                                <div>
-                                    <div class="settings-item-text">Dados só neste aparelho</div>
-                                    <div class="settings-item-desc">Nada é enviado para a internet (LGPD)</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="settings-group">
-                        <div class="settings-group-title">Dados</div>
-                        <button class="settings-item settings-tap" id="settings-clear-data">
-                            <span class="settings-item-left">
-                                <span class="settings-item-icon" style="background: var(--color-emergency);">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--color-emergency-icon);"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                                </span>
-                                <span class="settings-item-text danger-text">Limpar Todos os Dados</span>
-                            </span>
+                        <button class="settings-item" id="settings-clear-data">
+                            <span class="settings-item-icon danger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></span>
+                            <span class="settings-item-left settings-item-text danger-text">Apagar todos os dados</span>
                         </button>
                     </div>
+                    <p class="home-footnote">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        Os dados ficam só neste aparelho e nada é enviado para a internet (LGPD).
+                    </p>
                 </div>
             </div>
         </div>
@@ -498,7 +351,7 @@
         <!-- ==================== TELA DE EMERGÊNCIA ==================== -->
         <div id="screen-emergency" class="screen">
             <header class="screen-header">
-                <div class="header-top header-top-center">
+                <div class="header-top">
                     <button class="back-button" data-back aria-label="Voltar">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
                     </button>
@@ -523,17 +376,13 @@
                         <span>Ligar para <span id="emergency-caregiver-label">Cuidador</span></span>
                     </button>
                 </div>
-                <button class="fall-btn" id="btn-register-fall">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                    Registrar que tive uma queda
-                </button>
             </div>
         </div>
 
         <!-- ==================== TELA DE EDIÇÃO (genérica) ==================== -->
         <div id="screen-edit" class="screen">
             <header class="screen-header">
-                <div class="header-top header-top-center">
+                <div class="header-top">
                     <button class="back-button" data-back aria-label="Voltar">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
                     </button>
