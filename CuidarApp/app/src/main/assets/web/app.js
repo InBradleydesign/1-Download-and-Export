@@ -1,84 +1,1128 @@
-// ==================== ESTADO DA APLICAÇÃO ====================
+// ==================== CUIDARAPP - VERSÃO OFFLINE ====================
+// Aplicativo funciona como bloco de notas personalizado e interativo
+// para uso em um único dispositivo (idoso ou cuidador)
+
 const App = {
-    usuario: null,
-    idosoSelecionado: null,
-    diaSelecionado: 1,
-    fontScale: 1,
-    isProcessing: false,
-    
-    diasSemana: ['', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'],
-    diasSemanaAbrev: ['', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
+    settings: {
+        elderlyName: 'Idoso',
+        caregiverName: 'Cuidador',
+        password: '1234',
+        deviceOwner: 'elderly',
+        fontSize: 100,
+        animationsEnabled: true,
+        emergencyPhone: '192'
+    },
+    data: {
+        medications: [],
+        exercises: [],
+        visits: [],
+        diet: {},
+        tasks: [],
+        moodHistory: []
+    },
+    currentScreen: 'screen-home',
+    previousScreen: null,
+    currentCategory: 'all',
+    editingItem: null,
+    editingType: null
 };
 
-// ==================== UTILITÁRIOS ====================
-function callBridge(method, ...args) {
-    if (typeof AndroidBridge === 'undefined') {
-        console.warn('AndroidBridge não disponível');
-        return { success: false, error: 'Bridge não disponível' };
-    }
+// ==================== INICIALIZAÇÃO ====================
+document.addEventListener('DOMContentLoaded', () => {
+    loadFromStorage();
+    applySettings();
+    initNavigation();
+    initPasswordModal();
+    initConfirmModal();
+    initSettings();
+    initElderlyScreen();
+    initCaregiverScreen();
+    initEmergencyScreen();
+    initEditScreen();
+    renderHomeScreen();
+    
+    showScreen('screen-home');
+});
+
+// ==================== STORAGE ====================
+function loadFromStorage() {
     try {
-        const result = AndroidBridge[method](...args);
-        return JSON.parse(result);
+        const savedSettings = localStorage.getItem('cuidarapp_settings');
+        if (savedSettings) {
+            App.settings = { ...App.settings, ...JSON.parse(savedSettings) };
+        }
+        
+        const savedData = localStorage.getItem('cuidarapp_data');
+        if (savedData) {
+            App.data = { ...App.data, ...JSON.parse(savedData) };
+        }
     } catch (e) {
-        console.error('Erro ao chamar bridge:', e);
-        return { success: false, error: 'Erro interno' };
+        console.error('Erro ao carregar dados:', e);
     }
 }
 
-function showScreen(screenId) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    const screen = document.getElementById(screenId);
-    if (screen) {
-        screen.classList.add('active');
-        const firstFocusable = screen.querySelector('button, input, select, textarea, [tabindex]:not([tabindex="-1"])');
-        if (firstFocusable) firstFocusable.focus();
+function saveToStorage() {
+    try {
+        localStorage.setItem('cuidarapp_settings', JSON.stringify(App.settings));
+        localStorage.setItem('cuidarapp_data', JSON.stringify(App.data));
+    } catch (e) {
+        console.error('Erro ao salvar dados:', e);
     }
 }
 
+function applySettings() {
+    document.documentElement.style.setProperty('--font-scale', App.settings.fontSize / 100);
+    
+    if (!App.settings.animationsEnabled) {
+        document.body.classList.add('no-animations');
+    } else {
+        document.body.classList.remove('no-animations');
+    }
+    
+    updateDisplayNames();
+}
+
+function updateDisplayNames() {
+    document.getElementById('elderly-name').textContent = App.settings.elderlyName;
+    document.getElementById('caregiver-name').textContent = App.settings.caregiverName;
+    document.getElementById('elderly-greeting-name').textContent = App.settings.elderlyName;
+    document.getElementById('caregiver-greeting-name').textContent = App.settings.caregiverName;
+    document.getElementById('display-elderly-name').textContent = App.settings.elderlyName;
+    document.getElementById('display-caregiver-name').textContent = App.settings.caregiverName;
+    document.getElementById('display-emergency-phone').textContent = App.settings.emergencyPhone;
+    document.getElementById('font-size-value').textContent = App.settings.fontSize + '%';
+    
+    const deviceButtons = document.querySelectorAll('.device-option');
+    deviceButtons.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.device === App.settings.deviceOwner);
+    });
+    
+    const animToggle = document.getElementById('toggle-animations');
+    if (animToggle) {
+        animToggle.classList.toggle('active', App.settings.animationsEnabled);
+    }
+}
+
+// ==================== NAVEGAÇÃO ====================
+function showScreen(screenId, direction = 'forward') {
+    const currentScreen = document.querySelector('.screen.active');
+    const newScreen = document.getElementById(screenId);
+    
+    if (!newScreen || (currentScreen && currentScreen.id === screenId)) return;
+    
+    App.previousScreen = App.currentScreen;
+    App.currentScreen = screenId;
+    
+    if (currentScreen) {
+        currentScreen.classList.remove('active');
+    }
+    
+    newScreen.classList.add('active');
+    
+    if (screenId === 'screen-elderly') {
+        renderElderlyTasks();
+    } else if (screenId === 'screen-caregiver') {
+        renderCaregiverScreen();
+    } else if (screenId === 'screen-settings') {
+        updateDisplayNames();
+    }
+}
+
+function initNavigation() {
+    document.getElementById('btn-enter-elderly').addEventListener('click', () => {
+        showScreen('screen-elderly');
+    });
+    
+    document.getElementById('btn-enter-caregiver').addEventListener('click', () => {
+        showPasswordModal();
+    });
+    
+    document.getElementById('btn-elderly-home').addEventListener('click', () => {
+        showScreen('screen-home');
+    });
+    
+    document.getElementById('btn-caregiver-home').addEventListener('click', () => {
+        showScreen('screen-home');
+    });
+    
+    document.getElementById('btn-caregiver-settings').addEventListener('click', () => {
+        showScreen('screen-settings');
+    });
+    
+    document.getElementById('btn-back-settings').addEventListener('click', () => {
+        showScreen('screen-caregiver');
+    });
+    
+    document.getElementById('btn-back-emergency').addEventListener('click', () => {
+        showScreen(App.previousScreen || 'screen-elderly');
+    });
+    
+    document.getElementById('btn-back-edit').addEventListener('click', () => {
+        showScreen(App.previousScreen || 'screen-caregiver');
+    });
+    
+    document.getElementById('btn-emergency').addEventListener('click', () => {
+        showScreen('screen-emergency');
+    });
+    
+    initCategoryPills();
+    initBottomNav();
+}
+
+function initCategoryPills() {
+    document.querySelectorAll('.category-pill').forEach(pill => {
+        pill.addEventListener('click', () => {
+            document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            App.currentCategory = pill.dataset.category;
+            renderElderlyTasks();
+        });
+    });
+}
+
+function initBottomNav() {
+    document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const screen = item.dataset.screen;
+            if (!screen) return;
+            
+            document.querySelectorAll('.bottom-nav .nav-item').forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+        });
+    });
+}
+
+// ==================== MODAL DE SENHA ====================
+function initPasswordModal() {
+    const modal = document.getElementById('password-modal');
+    const input = document.getElementById('password-input');
+    const errorEl = document.getElementById('password-error');
+    const cancelBtn = document.getElementById('password-cancel');
+    const confirmBtn = document.getElementById('password-confirm');
+    
+    cancelBtn.addEventListener('click', () => {
+        closePasswordModal();
+    });
+    
+    confirmBtn.addEventListener('click', () => {
+        validatePassword();
+    });
+    
+    input.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') {
+            validatePassword();
+        }
+    });
+    
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closePasswordModal();
+        }
+    });
+}
+
+function showPasswordModal() {
+    const modal = document.getElementById('password-modal');
+    const input = document.getElementById('password-input');
+    const errorEl = document.getElementById('password-error');
+    
+    input.value = '';
+    errorEl.classList.remove('show');
+    input.classList.remove('error');
+    modal.classList.add('active');
+    
+    setTimeout(() => input.focus(), 100);
+}
+
+function closePasswordModal() {
+    const modal = document.getElementById('password-modal');
+    modal.classList.remove('active');
+}
+
+function validatePassword() {
+    const input = document.getElementById('password-input');
+    const errorEl = document.getElementById('password-error');
+    
+    if (input.value === App.settings.password) {
+        closePasswordModal();
+        showScreen('screen-caregiver');
+    } else {
+        input.classList.add('error');
+        errorEl.classList.add('show');
+        input.value = '';
+        input.focus();
+        
+        setTimeout(() => {
+            input.classList.remove('error');
+        }, 500);
+    }
+}
+
+// ==================== MODAL DE CONFIRMAÇÃO ====================
+let confirmCallback = null;
+
+function initConfirmModal() {
+    const modal = document.getElementById('confirm-modal');
+    const cancelBtn = document.getElementById('confirm-cancel');
+    const okBtn = document.getElementById('confirm-ok');
+    
+    cancelBtn.addEventListener('click', () => {
+        modal.classList.remove('active');
+        confirmCallback = null;
+    });
+    
+    okBtn.addEventListener('click', () => {
+        modal.classList.remove('active');
+        if (confirmCallback) {
+            confirmCallback();
+            confirmCallback = null;
+        }
+    });
+    
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.classList.remove('active');
+            confirmCallback = null;
+        }
+    });
+}
+
+function showConfirm(title, message, callback) {
+    const modal = document.getElementById('confirm-modal');
+    document.getElementById('confirm-title').textContent = title;
+    document.getElementById('confirm-message').textContent = message;
+    confirmCallback = callback;
+    modal.classList.add('active');
+}
+
+// ==================== TOAST ====================
 function showToast(message, type = 'info') {
     const container = document.getElementById('toast-container');
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     toast.textContent = message;
-    toast.setAttribute('role', 'alert');
     container.appendChild(toast);
     
     setTimeout(() => {
         toast.style.opacity = '0';
+        toast.style.transform = 'translateY(20px)';
         setTimeout(() => toast.remove(), 300);
     }, 3000);
 }
 
-function showModal(title, body, onConfirm, confirmText = 'Confirmar') {
-    const overlay = document.getElementById('modal-overlay');
-    document.getElementById('modal-title').textContent = title;
-    document.getElementById('modal-body').innerHTML = body;
-    
-    const confirmBtn = document.getElementById('modal-confirm');
-    confirmBtn.textContent = confirmText;
-    confirmBtn.onclick = () => {
-        overlay.classList.remove('active');
-        if (onConfirm) onConfirm();
-    };
-    
-    document.getElementById('modal-cancel').onclick = () => {
-        overlay.classList.remove('active');
-    };
-    
-    overlay.classList.add('active');
+// ==================== TELA HOME ====================
+function renderHomeScreen() {
+    updateDisplayNames();
 }
 
-function preventDoubleClick(btn, callback) {
-    if (App.isProcessing) return;
-    App.isProcessing = true;
-    btn.disabled = true;
+// ==================== TELA DO IDOSO ====================
+function initElderlyScreen() {
+}
+
+function renderElderlyTasks() {
+    const container = document.getElementById('elderly-tasks');
+    const visitsContainer = document.getElementById('elderly-visits');
     
-    callback().finally(() => {
-        App.isProcessing = false;
-        btn.disabled = false;
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    
+    let tasks = [];
+    
+    App.data.medications.forEach(med => {
+        if (shouldShowToday(med.frequency, dayOfWeek)) {
+            tasks.push({
+                id: med.id,
+                type: 'medication',
+                title: med.name,
+                subtitle: med.dosage,
+                time: med.time,
+                done: isMedicationDoneToday(med.id),
+                icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>`,
+                color: 'var(--color-medication)',
+                iconColor: 'var(--color-medication-icon)'
+            });
+        }
+    });
+    
+    App.data.exercises.forEach(ex => {
+        tasks.push({
+            id: ex.id,
+            type: 'exercise',
+            title: ex.name,
+            subtitle: `${ex.duration} minutos`,
+            time: ex.time || '',
+            done: isExerciseDoneToday(ex.id),
+            icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="3"/><path d="M12 22V8"/><path d="m5 12 7 3 7-3"/></svg>`,
+            color: 'var(--color-exercise)',
+            iconColor: 'var(--color-exercise-icon)'
+        });
+    });
+    
+    if (App.currentCategory !== 'all') {
+        tasks = tasks.filter(t => t.type === App.currentCategory);
+    }
+    
+    tasks.sort((a, b) => {
+        if (a.done !== b.done) return a.done ? 1 : -1;
+        return (a.time || '').localeCompare(b.time || '');
+    });
+    
+    if (tasks.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+                </div>
+                <div class="empty-state-title">Tudo em dia!</div>
+                <div class="empty-state-text">Não há tarefas pendentes para hoje.</div>
+            </div>
+        `;
+    } else {
+        container.innerHTML = tasks.map(task => `
+            <div class="task-card ${task.done ? 'featured' : ''}" data-id="${task.id}" data-type="${task.type}">
+                <div class="task-avatar" style="background: ${task.color};">
+                    <span style="color: ${task.iconColor};">${task.icon}</span>
+                </div>
+                <div class="task-info">
+                    <div class="task-title">${escapeHtml(task.title)}</div>
+                    <div class="task-subtitle">${escapeHtml(task.subtitle)}</div>
+                    ${task.time ? `<div class="task-badges"><span class="task-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>${task.time}</span></div>` : ''}
+                </div>
+                <div class="task-check ${task.done ? 'checked' : ''}" data-id="${task.id}" data-type="${task.type}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20,6 9,17 4,12"/></svg>
+                </div>
+            </div>
+        `).join('');
+        
+        container.querySelectorAll('.task-check').forEach(check => {
+            check.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const id = parseInt(check.dataset.id);
+                const type = check.dataset.type;
+                
+                if (type === 'medication') {
+                    toggleMedicationDone(id);
+                } else if (type === 'exercise') {
+                    toggleExerciseDone(id);
+                }
+                
+                renderElderlyTasks();
+            });
+        });
+    }
+    
+    const upcomingVisits = App.data.visits
+        .filter(v => new Date(v.date) >= today)
+        .sort((a, b) => new Date(a.date) - new Date(b.date))
+        .slice(0, 3);
+    
+    if (upcomingVisits.length === 0) {
+        visitsContainer.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-text">Nenhuma visita agendada.</div>
+            </div>
+        `;
+    } else {
+        visitsContainer.innerHTML = upcomingVisits.map(visit => `
+            <div class="task-card">
+                <div class="task-avatar" style="background: var(--color-visit);">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--color-visit-icon);"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </div>
+                <div class="task-info">
+                    <div class="task-title">${formatDate(visit.date)}</div>
+                    <div class="task-subtitle">${escapeHtml(visit.description || 'Visita agendada')}</div>
+                    ${visit.time ? `<div class="task-badges"><span class="task-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>${visit.time}</span></div>` : ''}
+                </div>
+            </div>
+        `).join('');
+    }
+}
+
+function shouldShowToday(frequency, dayOfWeek) {
+    if (!frequency || frequency === 'daily') return true;
+    if (frequency === 'weekly') return dayOfWeek === 1;
+    if (frequency === 'weekdays') return dayOfWeek >= 1 && dayOfWeek <= 5;
+    return true;
+}
+
+function isMedicationDoneToday(id) {
+    const today = new Date().toDateString();
+    const key = `med_${id}_${today}`;
+    return localStorage.getItem(key) === 'done';
+}
+
+function toggleMedicationDone(id) {
+    const today = new Date().toDateString();
+    const key = `med_${id}_${today}`;
+    if (localStorage.getItem(key) === 'done') {
+        localStorage.removeItem(key);
+        showToast('Medicamento desmarcado');
+    } else {
+        localStorage.setItem(key, 'done');
+        showToast('Medicamento tomado!', 'success');
+    }
+}
+
+function isExerciseDoneToday(id) {
+    const today = new Date().toDateString();
+    const key = `ex_${id}_${today}`;
+    return localStorage.getItem(key) === 'done';
+}
+
+function toggleExerciseDone(id) {
+    const today = new Date().toDateString();
+    const key = `ex_${id}_${today}`;
+    if (localStorage.getItem(key) === 'done') {
+        localStorage.removeItem(key);
+        showToast('Exercício desmarcado');
+    } else {
+        localStorage.setItem(key, 'done');
+        showToast('Exercício concluído!', 'success');
+    }
+}
+
+// ==================== TELA DO CUIDADOR ====================
+function initCaregiverScreen() {
+    document.getElementById('btn-add-medication').addEventListener('click', () => {
+        openEditScreen('medication', null);
+    });
+    
+    document.getElementById('btn-add-exercise').addEventListener('click', () => {
+        openEditScreen('exercise', null);
+    });
+    
+    document.getElementById('btn-add-visit').addEventListener('click', () => {
+        openEditScreen('visit', null);
+    });
+    
+    document.getElementById('btn-edit-diet').addEventListener('click', () => {
+        openEditScreen('diet', null);
+    });
+    
+    document.getElementById('btn-view-all-meds').addEventListener('click', () => {
+        openEditScreen('medication-list', null);
+    });
+    
+    document.getElementById('btn-view-all-visits').addEventListener('click', () => {
+        openEditScreen('visit-list', null);
     });
 }
 
+function renderCaregiverScreen() {
+    renderCaregiverMeds();
+    renderCaregiverVisits();
+    renderCaregiverProgress();
+}
+
+function renderCaregiverMeds() {
+    const container = document.getElementById('caregiver-meds-list');
+    const meds = App.data.medications.slice(0, 3);
+    
+    if (meds.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state" style="padding: var(--spacing-md);">
+                <div class="empty-state-text">Nenhum medicamento cadastrado</div>
+            </div>
+        `;
+    } else {
+        container.innerHTML = meds.map(med => `
+            <div class="task-card" onclick="openEditScreen('medication', ${med.id})">
+                <div class="task-avatar" style="background: var(--color-medication);">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--color-medication-icon);"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                </div>
+                <div class="task-info">
+                    <div class="task-title">${escapeHtml(med.name)}</div>
+                    <div class="task-subtitle">${escapeHtml(med.dosage)}</div>
+                </div>
+                <div class="profile-arrow">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+            </div>
+        `).join('');
+    }
+}
+
+function renderCaregiverVisits() {
+    const container = document.getElementById('caregiver-visits-list');
+    const today = new Date();
+    const visits = App.data.visits
+        .filter(v => new Date(v.date) >= today)
+        .sort((a, b) => new Date(a.date) - new Date(b.date))
+        .slice(0, 3);
+    
+    if (visits.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state" style="padding: var(--spacing-md);">
+                <div class="empty-state-text">Nenhuma visita agendada</div>
+            </div>
+        `;
+    } else {
+        container.innerHTML = visits.map(visit => `
+            <div class="task-card" onclick="openEditScreen('visit', ${visit.id})">
+                <div class="task-avatar" style="background: var(--color-visit);">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--color-visit-icon);"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </div>
+                <div class="task-info">
+                    <div class="task-title">${formatDate(visit.date)}</div>
+                    <div class="task-subtitle">${escapeHtml(visit.description || 'Visita')}</div>
+                </div>
+                <div class="profile-arrow">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+            </div>
+        `).join('');
+    }
+}
+
+function renderCaregiverProgress() {
+    const container = document.getElementById('caregiver-progress');
+    
+    const totalMeds = App.data.medications.length;
+    const totalExercises = App.data.exercises.length;
+    
+    let medsDone = 0;
+    let exDone = 0;
+    const today = new Date().toDateString();
+    
+    App.data.medications.forEach(med => {
+        if (localStorage.getItem(`med_${med.id}_${today}`) === 'done') medsDone++;
+    });
+    
+    App.data.exercises.forEach(ex => {
+        if (localStorage.getItem(`ex_${ex.id}_${today}`) === 'done') exDone++;
+    });
+    
+    const medsPct = totalMeds > 0 ? Math.round((medsDone / totalMeds) * 100) : 0;
+    const exPct = totalExercises > 0 ? Math.round((exDone / totalExercises) * 100) : 0;
+    
+    container.innerHTML = `
+        <div class="task-card">
+            <div class="task-info" style="flex: 1;">
+                <div class="task-title">Medicamentos</div>
+                <div class="task-subtitle">${medsDone} de ${totalMeds} tomados hoje</div>
+                <div style="background: var(--color-border); height: 8px; border-radius: 4px; margin-top: 8px;">
+                    <div style="background: var(--color-medication-icon); height: 100%; border-radius: 4px; width: ${medsPct}%; transition: width 0.3s;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="task-card">
+            <div class="task-info" style="flex: 1;">
+                <div class="task-title">Exercícios</div>
+                <div class="task-subtitle">${exDone} de ${totalExercises} concluídos hoje</div>
+                <div style="background: var(--color-border); height: 8px; border-radius: 4px; margin-top: 8px;">
+                    <div style="background: var(--color-exercise-icon); height: 100%; border-radius: 4px; width: ${exPct}%; transition: width 0.3s;"></div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// ==================== TELA DE CONFIGURAÇÕES ====================
+function initSettings() {
+    document.getElementById('settings-elderly-name').addEventListener('click', () => {
+        const newName = prompt('Nome do Idoso:', App.settings.elderlyName);
+        if (newName && newName.trim()) {
+            App.settings.elderlyName = newName.trim();
+            saveToStorage();
+            updateDisplayNames();
+            showToast('Nome atualizado!', 'success');
+        }
+    });
+    
+    document.getElementById('settings-caregiver-name').addEventListener('click', () => {
+        const newName = prompt('Nome do Cuidador:', App.settings.caregiverName);
+        if (newName && newName.trim()) {
+            App.settings.caregiverName = newName.trim();
+            saveToStorage();
+            updateDisplayNames();
+            showToast('Nome atualizado!', 'success');
+        }
+    });
+    
+    document.querySelectorAll('.device-option').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.device-option').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            App.settings.deviceOwner = btn.dataset.device;
+            saveToStorage();
+            showToast('Configuração salva!', 'success');
+        });
+    });
+    
+    document.getElementById('btn-font-decrease').addEventListener('click', () => {
+        if (App.settings.fontSize > 80) {
+            App.settings.fontSize -= 10;
+            saveToStorage();
+            applySettings();
+            showToast(`Fonte: ${App.settings.fontSize}%`);
+        }
+    });
+    
+    document.getElementById('btn-font-increase').addEventListener('click', () => {
+        if (App.settings.fontSize < 150) {
+            App.settings.fontSize += 10;
+            saveToStorage();
+            applySettings();
+            showToast(`Fonte: ${App.settings.fontSize}%`);
+        }
+    });
+    
+    document.getElementById('toggle-animations').addEventListener('click', () => {
+        App.settings.animationsEnabled = !App.settings.animationsEnabled;
+        saveToStorage();
+        applySettings();
+        showToast(App.settings.animationsEnabled ? 'Animações ativadas' : 'Animações desativadas');
+    });
+    
+    document.getElementById('settings-change-password').addEventListener('click', () => {
+        const currentPassword = prompt('Digite a senha atual:');
+        if (currentPassword !== App.settings.password) {
+            showToast('Senha incorreta!', 'error');
+            return;
+        }
+        
+        const newPassword = prompt('Digite a nova senha (4 dígitos):');
+        if (!newPassword || !/^\d{4}$/.test(newPassword)) {
+            showToast('A senha deve ter 4 dígitos!', 'error');
+            return;
+        }
+        
+        App.settings.password = newPassword;
+        saveToStorage();
+        showToast('Senha alterada!', 'success');
+    });
+    
+    document.getElementById('settings-emergency-phone').addEventListener('click', () => {
+        const newPhone = prompt('Telefone de Emergência:', App.settings.emergencyPhone);
+        if (newPhone && newPhone.trim()) {
+            App.settings.emergencyPhone = newPhone.trim().replace(/\D/g, '');
+            saveToStorage();
+            updateDisplayNames();
+            showToast('Telefone atualizado!', 'success');
+        }
+    });
+    
+    document.getElementById('settings-clear-data').addEventListener('click', () => {
+        showConfirm('Limpar Dados', 'Tem certeza que deseja apagar TODOS os dados? Esta ação não pode ser desfeita.', () => {
+            localStorage.clear();
+            App.settings = {
+                elderlyName: 'Idoso',
+                caregiverName: 'Cuidador',
+                password: '1234',
+                deviceOwner: 'elderly',
+                fontSize: 100,
+                animationsEnabled: true,
+                emergencyPhone: '192'
+            };
+            App.data = {
+                medications: [],
+                exercises: [],
+                visits: [],
+                diet: {},
+                tasks: [],
+                moodHistory: []
+            };
+            saveToStorage();
+            applySettings();
+            showToast('Dados apagados!', 'success');
+            showScreen('screen-home');
+        });
+    });
+}
+
+// ==================== TELA DE EMERGÊNCIA ====================
+function initEmergencyScreen() {
+    document.getElementById('btn-call-emergency').addEventListener('click', () => {
+        window.location.href = `tel:${App.settings.emergencyPhone}`;
+    });
+}
+
+// ==================== TELA DE EDIÇÃO ====================
+function initEditScreen() {
+}
+
+function openEditScreen(type, id) {
+    App.editingType = type;
+    App.editingItem = id;
+    
+    const title = document.getElementById('edit-screen-title');
+    const container = document.getElementById('edit-form-container');
+    
+    if (type === 'medication') {
+        title.textContent = id ? 'Editar Medicamento' : 'Novo Medicamento';
+        renderMedicationForm(container, id);
+    } else if (type === 'exercise') {
+        title.textContent = id ? 'Editar Exercício' : 'Novo Exercício';
+        renderExerciseForm(container, id);
+    } else if (type === 'visit') {
+        title.textContent = id ? 'Editar Visita' : 'Nova Visita';
+        renderVisitForm(container, id);
+    } else if (type === 'diet') {
+        title.textContent = 'Dieta da Semana';
+        renderDietForm(container);
+    } else if (type === 'medication-list') {
+        title.textContent = 'Todos os Medicamentos';
+        renderMedicationList(container);
+    } else if (type === 'visit-list') {
+        title.textContent = 'Todas as Visitas';
+        renderVisitList(container);
+    }
+    
+    showScreen('screen-edit');
+}
+
+function renderMedicationForm(container, id) {
+    const med = id ? App.data.medications.find(m => m.id === id) : null;
+    
+    container.innerHTML = `
+        <form id="form-medication" class="edit-form">
+            <div class="form-group">
+                <label class="form-label">Nome do Medicamento *</label>
+                <input type="text" class="form-input" id="med-name" value="${med ? escapeHtml(med.name) : ''}" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Dosagem *</label>
+                <input type="text" class="form-input" id="med-dosage" value="${med ? escapeHtml(med.dosage) : ''}" placeholder="Ex: 1 comprimido, 10ml" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Horário</label>
+                <input type="time" class="form-input" id="med-time" value="${med ? med.time || '' : ''}">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Frequência</label>
+                <select class="form-input" id="med-frequency">
+                    <option value="daily" ${!med || med.frequency === 'daily' ? 'selected' : ''}>Diário</option>
+                    <option value="weekdays" ${med && med.frequency === 'weekdays' ? 'selected' : ''}>Dias úteis</option>
+                    <option value="weekly" ${med && med.frequency === 'weekly' ? 'selected' : ''}>Semanal</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Instruções</label>
+                <textarea class="form-input form-textarea" id="med-instructions" placeholder="Ex: Tomar com água, antes das refeições">${med ? escapeHtml(med.instructions || '') : ''}</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">
+                ${id ? 'Salvar Alterações' : 'Adicionar Medicamento'}
+            </button>
+            ${id ? `<button type="button" class="btn btn-danger btn-block" style="margin-top: 8px;" onclick="deleteMedication(${id})">Excluir Medicamento</button>` : ''}
+        </form>
+    `;
+    
+    document.getElementById('form-medication').addEventListener('submit', (e) => {
+        e.preventDefault();
+        saveMedication(id);
+    });
+}
+
+function saveMedication(id) {
+    const name = document.getElementById('med-name').value.trim();
+    const dosage = document.getElementById('med-dosage').value.trim();
+    const time = document.getElementById('med-time').value;
+    const frequency = document.getElementById('med-frequency').value;
+    const instructions = document.getElementById('med-instructions').value.trim();
+    
+    if (!name || !dosage) {
+        showToast('Preencha os campos obrigatórios!', 'error');
+        return;
+    }
+    
+    if (id) {
+        const index = App.data.medications.findIndex(m => m.id === id);
+        if (index !== -1) {
+            App.data.medications[index] = { id, name, dosage, time, frequency, instructions };
+        }
+    } else {
+        const newId = Date.now();
+        App.data.medications.push({ id: newId, name, dosage, time, frequency, instructions });
+    }
+    
+    saveToStorage();
+    showToast(id ? 'Medicamento atualizado!' : 'Medicamento adicionado!', 'success');
+    showScreen('screen-caregiver');
+    renderCaregiverScreen();
+}
+
+function deleteMedication(id) {
+    showConfirm('Excluir Medicamento', 'Tem certeza que deseja excluir este medicamento?', () => {
+        App.data.medications = App.data.medications.filter(m => m.id !== id);
+        saveToStorage();
+        showToast('Medicamento excluído!', 'success');
+        showScreen('screen-caregiver');
+        renderCaregiverScreen();
+    });
+}
+
+function renderExerciseForm(container, id) {
+    const ex = id ? App.data.exercises.find(e => e.id === id) : null;
+    
+    container.innerHTML = `
+        <form id="form-exercise" class="edit-form">
+            <div class="form-group">
+                <label class="form-label">Nome do Exercício *</label>
+                <input type="text" class="form-input" id="ex-name" value="${ex ? escapeHtml(ex.name) : ''}" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Duração (minutos) *</label>
+                <input type="number" class="form-input" id="ex-duration" value="${ex ? ex.duration : '15'}" min="1" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Horário Sugerido</label>
+                <input type="time" class="form-input" id="ex-time" value="${ex ? ex.time || '' : ''}">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Descrição</label>
+                <textarea class="form-input form-textarea" id="ex-description" placeholder="Descreva o exercício">${ex ? escapeHtml(ex.description || '') : ''}</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">
+                ${id ? 'Salvar Alterações' : 'Adicionar Exercício'}
+            </button>
+            ${id ? `<button type="button" class="btn btn-danger btn-block" style="margin-top: 8px;" onclick="deleteExercise(${id})">Excluir Exercício</button>` : ''}
+        </form>
+    `;
+    
+    document.getElementById('form-exercise').addEventListener('submit', (e) => {
+        e.preventDefault();
+        saveExercise(id);
+    });
+}
+
+function saveExercise(id) {
+    const name = document.getElementById('ex-name').value.trim();
+    const duration = parseInt(document.getElementById('ex-duration').value);
+    const time = document.getElementById('ex-time').value;
+    const description = document.getElementById('ex-description').value.trim();
+    
+    if (!name || !duration) {
+        showToast('Preencha os campos obrigatórios!', 'error');
+        return;
+    }
+    
+    if (id) {
+        const index = App.data.exercises.findIndex(e => e.id === id);
+        if (index !== -1) {
+            App.data.exercises[index] = { id, name, duration, time, description };
+        }
+    } else {
+        const newId = Date.now();
+        App.data.exercises.push({ id: newId, name, duration, time, description });
+    }
+    
+    saveToStorage();
+    showToast(id ? 'Exercício atualizado!' : 'Exercício adicionado!', 'success');
+    showScreen('screen-caregiver');
+    renderCaregiverScreen();
+}
+
+function deleteExercise(id) {
+    showConfirm('Excluir Exercício', 'Tem certeza que deseja excluir este exercício?', () => {
+        App.data.exercises = App.data.exercises.filter(e => e.id !== id);
+        saveToStorage();
+        showToast('Exercício excluído!', 'success');
+        showScreen('screen-caregiver');
+        renderCaregiverScreen();
+    });
+}
+
+function renderVisitForm(container, id) {
+    const visit = id ? App.data.visits.find(v => v.id === id) : null;
+    const today = new Date().toISOString().split('T')[0];
+    
+    container.innerHTML = `
+        <form id="form-visit" class="edit-form">
+            <div class="form-group">
+                <label class="form-label">Data *</label>
+                <input type="date" class="form-input" id="visit-date" value="${visit ? visit.date : today}" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Horário</label>
+                <input type="time" class="form-input" id="visit-time" value="${visit ? visit.time || '' : ''}">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Descrição</label>
+                <textarea class="form-input form-textarea" id="visit-description" placeholder="Ex: Consulta médica, visita do cuidador">${visit ? escapeHtml(visit.description || '') : ''}</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">
+                ${id ? 'Salvar Alterações' : 'Agendar Visita'}
+            </button>
+            ${id ? `<button type="button" class="btn btn-danger btn-block" style="margin-top: 8px;" onclick="deleteVisit(${id})">Cancelar Visita</button>` : ''}
+        </form>
+    `;
+    
+    document.getElementById('form-visit').addEventListener('submit', (e) => {
+        e.preventDefault();
+        saveVisit(id);
+    });
+}
+
+function saveVisit(id) {
+    const date = document.getElementById('visit-date').value;
+    const time = document.getElementById('visit-time').value;
+    const description = document.getElementById('visit-description').value.trim();
+    
+    if (!date) {
+        showToast('Selecione uma data!', 'error');
+        return;
+    }
+    
+    if (id) {
+        const index = App.data.visits.findIndex(v => v.id === id);
+        if (index !== -1) {
+            App.data.visits[index] = { id, date, time, description };
+        }
+    } else {
+        const newId = Date.now();
+        App.data.visits.push({ id: newId, date, time, description });
+    }
+    
+    saveToStorage();
+    showToast(id ? 'Visita atualizada!' : 'Visita agendada!', 'success');
+    showScreen('screen-caregiver');
+    renderCaregiverScreen();
+}
+
+function deleteVisit(id) {
+    showConfirm('Cancelar Visita', 'Tem certeza que deseja cancelar esta visita?', () => {
+        App.data.visits = App.data.visits.filter(v => v.id !== id);
+        saveToStorage();
+        showToast('Visita cancelada!', 'success');
+        showScreen('screen-caregiver');
+        renderCaregiverScreen();
+    });
+}
+
+function renderDietForm(container) {
+    const days = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
+    
+    container.innerHTML = `
+        <form id="form-diet" class="edit-form">
+            <div style="display: flex; gap: 8px; overflow-x: auto; margin-bottom: 16px; padding-bottom: 8px;">
+                ${days.map((day, i) => `
+                    <button type="button" class="category-pill ${i === 0 ? 'active' : ''}" data-day="${i}" style="flex-shrink: 0;">
+                        <span class="category-pill-text">${day.substring(0, 3)}</span>
+                    </button>
+                `).join('')}
+            </div>
+            <div id="diet-day-content"></div>
+            <button type="submit" class="btn btn-primary btn-block" style="margin-top: 16px;">
+                Salvar Dieta
+            </button>
+        </form>
+    `;
+    
+    let selectedDay = 0;
+    
+    function renderDayContent() {
+        const diet = App.data.diet[selectedDay] || {};
+        document.getElementById('diet-day-content').innerHTML = `
+            <div class="form-group">
+                <label class="form-label">Café da Manhã</label>
+                <textarea class="form-input form-textarea" id="diet-breakfast" placeholder="O que comer no café da manhã">${escapeHtml(diet.breakfast || '')}</textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Almoço</label>
+                <textarea class="form-input form-textarea" id="diet-lunch" placeholder="O que comer no almoço">${escapeHtml(diet.lunch || '')}</textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Jantar</label>
+                <textarea class="form-input form-textarea" id="diet-dinner" placeholder="O que comer no jantar">${escapeHtml(diet.dinner || '')}</textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Lanches</label>
+                <textarea class="form-input form-textarea" id="diet-snacks" placeholder="Lanches entre refeições">${escapeHtml(diet.snacks || '')}</textarea>
+            </div>
+        `;
+    }
+    
+    renderDayContent();
+    
+    container.querySelectorAll('.category-pill').forEach(pill => {
+        pill.addEventListener('click', () => {
+            saveDayContent();
+            container.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            selectedDay = parseInt(pill.dataset.day);
+            renderDayContent();
+        });
+    });
+    
+    function saveDayContent() {
+        App.data.diet[selectedDay] = {
+            breakfast: document.getElementById('diet-breakfast')?.value.trim() || '',
+            lunch: document.getElementById('diet-lunch')?.value.trim() || '',
+            dinner: document.getElementById('diet-dinner')?.value.trim() || '',
+            snacks: document.getElementById('diet-snacks')?.value.trim() || ''
+        };
+    }
+    
+    document.getElementById('form-diet').addEventListener('submit', (e) => {
+        e.preventDefault();
+        saveDayContent();
+        saveToStorage();
+        showToast('Dieta salva!', 'success');
+        showScreen('screen-caregiver');
+    });
+}
+
+function renderMedicationList(container) {
+    if (App.data.medications.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                </div>
+                <div class="empty-state-title">Nenhum medicamento</div>
+                <div class="empty-state-text">Adicione medicamentos para acompanhar.</div>
+            </div>
+        `;
+    } else {
+        container.innerHTML = App.data.medications.map(med => `
+            <div class="task-card" onclick="openEditScreen('medication', ${med.id})">
+                <div class="task-avatar" style="background: var(--color-medication);">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--color-medication-icon);"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                </div>
+                <div class="task-info">
+                    <div class="task-title">${escapeHtml(med.name)}</div>
+                    <div class="task-subtitle">${escapeHtml(med.dosage)} ${med.time ? '• ' + med.time : ''}</div>
+                </div>
+                <div class="profile-arrow">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+            </div>
+        `).join('');
+    }
+}
+
+function renderVisitList(container) {
+    const visits = App.data.visits.sort((a, b) => new Date(a.date) - new Date(b.date));
+    
+    if (visits.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </div>
+                <div class="empty-state-title">Nenhuma visita</div>
+                <div class="empty-state-text">Agende visitas para acompanhamento.</div>
+            </div>
+        `;
+    } else {
+        container.innerHTML = visits.map(visit => `
+            <div class="task-card" onclick="openEditScreen('visit', ${visit.id})">
+                <div class="task-avatar" style="background: var(--color-visit);">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--color-visit-icon);"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </div>
+                <div class="task-info">
+                    <div class="task-title">${formatDate(visit.date)}</div>
+                    <div class="task-subtitle">${escapeHtml(visit.description || 'Visita')} ${visit.time ? '• ' + visit.time : ''}</div>
+                </div>
+                <div class="profile-arrow">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+            </div>
+        `).join('');
+    }
+}
+
+// ==================== UTILITÁRIOS ====================
 function escapeHtml(text) {
     if (!text) return '';
     const div = document.createElement('div');
@@ -88,1288 +1132,11 @@ function escapeHtml(text) {
 
 function formatDate(dateStr) {
     if (!dateStr) return '';
-    const date = new Date(dateStr + 'T00:00:00');
-    return date.toLocaleDateString('pt-BR');
+    const date = new Date(dateStr + 'T12:00:00');
+    const options = { weekday: 'short', day: 'numeric', month: 'short' };
+    return date.toLocaleDateString('pt-BR', options);
 }
 
-function formatTime(timeStr) {
-    if (!timeStr) return '';
-    return timeStr.substring(0, 5);
-}
-
-// ==================== FONTE ====================
-function updateFontScale(scale) {
-    App.fontScale = Math.max(0.8, Math.min(2.0, scale));
-    document.documentElement.style.setProperty('--font-scale', App.fontScale);
-    
-    const displayPercent = Math.round(App.fontScale * 100) + '%';
-    const display1 = document.getElementById('font-scale-display');
-    const display2 = document.getElementById('font-scale-display-idoso');
-    if (display1) display1.textContent = displayPercent;
-    if (display2) display2.textContent = displayPercent;
-    
-    if (App.usuario) {
-        callBridge('atualizarTamanhoFonte', App.fontScale);
-    }
-}
-
-// ==================== INICIALIZAÇÃO ====================
-document.addEventListener('DOMContentLoaded', () => {
-    initLogin();
-    initCuidador();
-    initIdoso();
-    initFontControls();
-    initPasswordToggles();
-    initWelcomeDate();
-    
-    const result = callBridge('getUsuarioLogado');
-    if (result.success && result.data) {
-        App.usuario = result.data;
-        App.fontScale = result.data.tamanhoFonte || 1;
-        updateFontScale(App.fontScale);
-        
-        if (result.data.tipoPerfil === 'CUIDADOR') {
-            showScreen('screen-cuidador-home');
-            loadIdososCuidador();
-        } else {
-            document.body.classList.add('idoso-view');
-            document.getElementById('idoso-nome-header').textContent = result.data.nome.split(' ')[0];
-            showScreen('screen-idoso-home');
-            updateWelcomeSummary();
-        }
-    }
-});
-
-function initPasswordToggles() {
-    document.querySelectorAll('.password-toggle').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const wrapper = btn.closest('.password-wrapper');
-            const input = wrapper.querySelector('.form-input');
-            const eyeIcon = btn.querySelector('.eye-icon');
-            const eyeOffIcon = btn.querySelector('.eye-off-icon');
-            
-            if (input.type === 'password') {
-                input.type = 'text';
-                if (eyeIcon) eyeIcon.style.display = 'none';
-                if (eyeOffIcon) eyeOffIcon.style.display = 'block';
-                btn.setAttribute('aria-label', 'Ocultar senha');
-            } else {
-                input.type = 'password';
-                if (eyeIcon) eyeIcon.style.display = 'block';
-                if (eyeOffIcon) eyeOffIcon.style.display = 'none';
-                btn.setAttribute('aria-label', 'Mostrar senha');
-            }
-        });
-    });
-}
-
-function initWelcomeDate() {
-    const dateEl = document.getElementById('welcome-date');
-    if (dateEl) {
-        const hoje = new Date();
-        const opcoes = { weekday: 'long', day: 'numeric', month: 'long' };
-        dateEl.textContent = hoje.toLocaleDateString('pt-BR', opcoes);
-    }
-}
-
-function updateWelcomeSummary() {
-    if (!App.usuario) return;
-    
-    const medsResult = callBridge('getMedicamentos', App.usuario.id);
-    const exResult = callBridge('getExercicios', App.usuario.id);
-    
-    const meds = medsResult.success && medsResult.data ? medsResult.data : [];
-    const exercises = exResult.success && exResult.data ? exResult.data : [];
-    
-    let medsConfirmed = 0;
-    let exercisesCompleted = 0;
-    
-    meds.forEach(med => {
-        const confirmResult = callBridge('isMedicamentoConfirmadoHoje', App.usuario.id, med.id);
-        if (confirmResult.success && confirmResult.data) medsConfirmed++;
-    });
-    
-    exercises.forEach(ex => {
-        const completeResult = callBridge('isExercicioConcluidoHoje', App.usuario.id, ex.id);
-        if (completeResult.success && completeResult.data) exercisesCompleted++;
-    });
-    
-    const medsTotal = meds.length;
-    const exTotal = exercises.length;
-    
-    const medsPct = medsTotal > 0 ? Math.round((medsConfirmed / medsTotal) * 100) : 0;
-    const exPct = exTotal > 0 ? Math.round((exercisesCompleted / exTotal) * 100) : 0;
-    
-    updateProgressCircle('progress-meds', medsPct);
-    updateProgressCircle('progress-exercises', exPct);
-    
-    const medsCountEl = document.getElementById('meds-count');
-    const exCountEl = document.getElementById('exercises-count');
-    const medsPctEl = document.getElementById('progress-meds-pct');
-    const exPctEl = document.getElementById('progress-exercises-pct');
-    
-    if (medsCountEl) medsCountEl.textContent = `${medsConfirmed} de ${medsTotal}`;
-    if (exCountEl) exCountEl.textContent = `${exercisesCompleted} de ${exTotal}`;
-    if (medsPctEl) medsPctEl.textContent = `${medsPct}%`;
-    if (exPctEl) exPctEl.textContent = `${exPct}%`;
-    
-    updateGreeting();
-    updateReminderCard(medsTotal - medsConfirmed, exTotal - exercisesCompleted);
-}
-
-function updateProgressCircle(elementId, percentage) {
-    const circle = document.getElementById(elementId);
-    if (!circle) return;
-    
-    const circumference = 100;
-    const offset = circumference - (percentage / 100) * circumference;
-    circle.style.strokeDashoffset = offset;
-}
-
-function updateReminderCard(pendingMeds, pendingExercises) {
-    const reminderMessage = document.getElementById('reminder-message');
-    const reminderDetail = document.getElementById('reminder-detail');
-    
-    if (!reminderMessage || !reminderDetail) return;
-    
-    if (pendingMeds > 0) {
-        reminderMessage.textContent = `Você tem ${pendingMeds} medicamento${pendingMeds > 1 ? 's' : ''} pendente${pendingMeds > 1 ? 's' : ''}.`;
-        reminderDetail.textContent = 'Não esqueça de verificar seus horários!';
-    } else if (pendingExercises > 0) {
-        reminderMessage.textContent = `Que tal fazer seu exercício de hoje?`;
-        reminderDetail.textContent = `Você tem ${pendingExercises} exercício${pendingExercises > 1 ? 's' : ''} para fazer.`;
-    } else {
-        reminderMessage.textContent = 'Parabéns! Você está em dia!';
-        reminderDetail.textContent = 'Continue cuidando da sua saúde.';
-    }
-}
-
-function updateGreeting() {
-    const greetingEl = document.querySelector('.welcome-greeting');
-    if (!greetingEl || !App.usuario) return;
-    
-    const hora = new Date().getHours();
-    let saudacao = 'Olá';
-    let emoji = '👋';
-    
-    if (hora >= 5 && hora < 12) {
-        saudacao = 'Bom dia';
-        emoji = '☀️';
-    } else if (hora >= 12 && hora < 18) {
-        saudacao = 'Boa tarde';
-        emoji = '🌤️';
-    } else {
-        saudacao = 'Boa noite';
-        emoji = '🌙';
-    }
-    
-    const nome = App.usuario.nome.split(' ')[0];
-    greetingEl.textContent = `${saudacao}, ${nome}! ${emoji}`;
-}
-
-function initFontControls() {
-    document.getElementById('btn-font-decrease')?.addEventListener('click', () => updateFontScale(App.fontScale - 0.1));
-    document.getElementById('btn-font-increase')?.addEventListener('click', () => updateFontScale(App.fontScale + 0.1));
-    document.getElementById('btn-font-decrease-idoso')?.addEventListener('click', () => updateFontScale(App.fontScale - 0.1));
-    document.getElementById('btn-font-increase-idoso')?.addEventListener('click', () => updateFontScale(App.fontScale + 0.1));
-}
-
-// ==================== LOGIN ====================
-function initLogin() {
-    const profileBtns = document.querySelectorAll('.profile-btn');
-    let selectedProfile = null;
-    
-    profileBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            profileBtns.forEach(b => {
-                b.classList.remove('selected');
-                b.setAttribute('aria-pressed', 'false');
-            });
-            btn.classList.add('selected');
-            btn.setAttribute('aria-pressed', 'true');
-            selectedProfile = btn.dataset.profile;
-            
-            const loginForm = document.getElementById('login-form');
-            loginForm.style.display = 'block';
-            loginForm.classList.add('fade-in');
-            
-            setTimeout(() => {
-                document.getElementById('login-email').focus();
-            }, 100);
-        });
-    });
-    
-    document.getElementById('login-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const btn = document.getElementById('btn-login');
-        const errorEl = document.getElementById('login-error');
-        
-        errorEl.style.display = 'none';
-        
-        preventDoubleClick(btn, async () => {
-            const email = document.getElementById('login-email').value;
-            const senha = document.getElementById('login-senha').value;
-            
-            if (!selectedProfile) {
-                errorEl.textContent = 'Selecione um perfil para continuar';
-                errorEl.style.display = 'block';
-                return;
-            }
-            
-            const result = callBridge('login', email, senha, selectedProfile);
-            
-            if (result.success) {
-                App.usuario = result.data;
-                App.fontScale = result.data.tamanhoFonte || 1;
-                updateFontScale(App.fontScale);
-                
-                if (result.data.tipoPerfil === 'CUIDADOR') {
-                    showScreen('screen-cuidador-home');
-                    loadIdososCuidador();
-                } else {
-                    document.body.classList.add('idoso-view');
-                    document.getElementById('idoso-nome-header').textContent = result.data.nome.split(' ')[0];
-                    showScreen('screen-idoso-home');
-                    updateWelcomeSummary();
-                }
-            } else {
-                errorEl.textContent = result.error || 'E-mail ou senha incorretos. Verifique e tente novamente.';
-                errorEl.style.display = 'block';
-                document.getElementById('login-senha').focus();
-            }
-        });
-    });
-}
-
-function logout() {
-    callBridge('logout');
-    App.usuario = null;
-    App.idosoSelecionado = null;
-    document.body.classList.remove('idoso-view');
-    document.getElementById('login-form').style.display = 'none';
-    document.getElementById('login-email').value = '';
-    document.getElementById('login-senha').value = '';
-    document.querySelectorAll('.profile-btn').forEach(b => {
-        b.classList.remove('selected');
-        b.setAttribute('aria-pressed', 'false');
-    });
-    showScreen('screen-login');
-}
-
-// ==================== CUIDADOR ====================
-function initCuidador() {
-    document.getElementById('btn-logout-cuidador')?.addEventListener('click', logout);
-    document.getElementById('btn-cadastrar-idoso')?.addEventListener('click', () => showScreen('screen-cadastrar-idoso'));
-    document.getElementById('btn-back-cadastrar-idoso')?.addEventListener('click', () => showScreen('screen-cuidador-home'));
-    document.getElementById('btn-back-gestao')?.addEventListener('click', () => showScreen('screen-cuidador-home'));
-    
-    initFormCadastrarIdoso();
-    initGestaoIdoso();
-}
-
-function loadIdososCuidador() {
-    const result = callBridge('listarIdosos');
-    const container = document.getElementById('lista-idosos-cuidador');
-    
-    if (!result.success || !result.data || result.data.length === 0) {
-        container.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-state-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                        <circle cx="12" cy="7" r="4"/>
-                    </svg>
-                </div>
-                <h3>Nenhum idoso cadastrado</h3>
-                <p>Comece cadastrando um idoso para gerenciar seus cuidados.</p>
-            </div>
-        `;
-        return;
-    }
-    
-    container.innerHTML = result.data.map(idoso => `
-        <button type="button" class="idoso-select-card" data-id="${idoso.id}" aria-label="Selecionar ${escapeHtml(idoso.nome)}">
-            <div class="idoso-avatar">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            </div>
-            <div class="idoso-info">
-                <div class="idoso-nome">${escapeHtml(idoso.nome)}</div>
-                <div class="idoso-email">${escapeHtml(idoso.email)}</div>
-            </div>
-            <div class="arrow">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-            </div>
-        </button>
-    `).join('');
-    
-    container.querySelectorAll('.idoso-select-card').forEach(card => {
-        card.addEventListener('click', () => {
-            App.idosoSelecionado = result.data.find(i => i.id == card.dataset.id);
-            document.getElementById('gestao-titulo').textContent = App.idosoSelecionado.nome;
-            showScreen('screen-gestao-idoso');
-        });
-    });
-}
-
-function initFormCadastrarIdoso() {
-    document.getElementById('form-cadastrar-idoso').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const btn = e.target.querySelector('button[type="submit"]');
-        
-        preventDoubleClick(btn, async () => {
-            const nome = document.getElementById('idoso-nome').value;
-            const email = document.getElementById('idoso-email').value;
-            const senha = document.getElementById('idoso-senha').value;
-            const telefone = document.getElementById('idoso-telefone').value;
-            const obs = document.getElementById('idoso-obs').value;
-            
-            const result = callBridge('cadastrarIdoso', nome, email, senha, telefone, obs);
-            
-            if (result.success) {
-                showToast('Idoso cadastrado com sucesso!', 'success');
-                e.target.reset();
-                showScreen('screen-cuidador-home');
-                loadIdososCuidador();
-            } else {
-                showToast(result.error || 'Erro ao cadastrar', 'error');
-            }
-        });
-    });
-}
-
-function initGestaoIdoso() {
-    document.getElementById('btn-progresso')?.addEventListener('click', () => {
-        showScreen('screen-progresso');
-        loadProgresso('mes');
-    });
-    document.getElementById('btn-back-progresso')?.addEventListener('click', () => showScreen('screen-gestao-idoso'));
-    document.getElementById('btn-progresso-semana')?.addEventListener('click', () => loadProgresso('semana'));
-    document.getElementById('btn-progresso-mes')?.addEventListener('click', () => loadProgresso('mes'));
-    
-    document.getElementById('btn-dieta-cuidador')?.addEventListener('click', () => {
-        showScreen('screen-dieta-cuidador');
-        initDiasTabs('dias-tabs-cuidador', loadDietaCuidador);
-    });
-    document.getElementById('btn-back-dieta-cuidador')?.addEventListener('click', () => showScreen('screen-gestao-idoso'));
-    initFormDieta();
-    
-    document.getElementById('btn-medicamentos-cuidador')?.addEventListener('click', () => {
-        showScreen('screen-medicamentos-cuidador');
-        loadMedicamentosCuidador();
-    });
-    document.getElementById('btn-back-med-cuidador')?.addEventListener('click', () => showScreen('screen-gestao-idoso'));
-    document.getElementById('btn-add-medicamento')?.addEventListener('click', () => {
-        document.getElementById('form-med-titulo').textContent = 'Novo Medicamento';
-        document.getElementById('form-medicamento').reset();
-        document.getElementById('med-id').value = '';
-        showScreen('screen-form-medicamento');
-    });
-    document.getElementById('btn-back-form-med')?.addEventListener('click', () => showScreen('screen-medicamentos-cuidador'));
-    initFormMedicamento();
-    
-    document.getElementById('btn-exercicios-cuidador')?.addEventListener('click', () => {
-        showScreen('screen-exercicios-cuidador');
-        loadExerciciosCuidador();
-    });
-    document.getElementById('btn-back-ex-cuidador')?.addEventListener('click', () => showScreen('screen-gestao-idoso'));
-    document.getElementById('btn-add-exercicio')?.addEventListener('click', () => {
-        document.getElementById('form-ex-titulo').textContent = 'Novo Exercício';
-        document.getElementById('form-exercicio').reset();
-        document.getElementById('ex-id').value = '';
-        showScreen('screen-form-exercicio');
-    });
-    document.getElementById('btn-back-form-ex')?.addEventListener('click', () => showScreen('screen-exercicios-cuidador'));
-    initFormExercicio();
-    
-    document.getElementById('btn-visitas-cuidador')?.addEventListener('click', () => {
-        showScreen('screen-visitas-cuidador');
-        loadVisitasCuidador();
-    });
-    document.getElementById('btn-back-visitas-cuidador')?.addEventListener('click', () => showScreen('screen-gestao-idoso'));
-    document.getElementById('btn-add-visita')?.addEventListener('click', () => {
-        document.getElementById('form-visita-titulo').textContent = 'Nova Visita';
-        document.getElementById('form-visita').reset();
-        document.getElementById('visita-id').value = '';
-        showScreen('screen-form-visita');
-    });
-    document.getElementById('btn-back-form-visita')?.addEventListener('click', () => showScreen('screen-visitas-cuidador'));
-    initFormVisita();
-    
-    document.getElementById('btn-editar-idoso')?.addEventListener('click', () => {
-        showScreen('screen-editar-idoso');
-        loadEditarIdoso();
-    });
-    document.getElementById('btn-back-editar-idoso')?.addEventListener('click', () => showScreen('screen-gestao-idoso'));
-    initFormEditarIdoso();
-}
-
-function loadProgresso(periodo) {
-    if (!App.idosoSelecionado) return;
-    
-    document.getElementById('btn-progresso-semana').classList.toggle('btn-primary', periodo === 'semana');
-    document.getElementById('btn-progresso-semana').classList.toggle('btn-secondary', periodo !== 'semana');
-    document.getElementById('btn-progresso-mes').classList.toggle('btn-primary', periodo === 'mes');
-    document.getElementById('btn-progresso-mes').classList.toggle('btn-secondary', periodo !== 'mes');
-    
-    const result = periodo === 'semana' 
-        ? callBridge('getProgressoSemana', App.idosoSelecionado.id)
-        : callBridge('getProgressoMes', App.idosoSelecionado.id);
-    
-    const container = document.getElementById('progresso-container');
-    
-    if (!result.success) {
-        container.innerHTML = '<p>Erro ao carregar progresso.</p>';
-        return;
-    }
-    
-    const data = result.data;
-    container.innerHTML = `
-        <p style="margin-bottom: 16px; color: var(--color-text-secondary);">
-            Período: ${formatDate(data.dataInicio)} a ${formatDate(data.dataFim)}
-        </p>
-        
-        <div class="progress-container">
-            <div class="progress-label">
-                <span>Refeições Registradas</span>
-                <span>${data.refeicoesRegistradas}/${data.refeicoesEsperadas}</span>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-fill ${data.percentualRefeicoes >= 70 ? 'success' : ''}" style="width: ${data.percentualRefeicoes}%"></div>
-            </div>
-        </div>
-        
-        <div class="progress-container">
-            <div class="progress-label">
-                <span>Medicamentos Confirmados</span>
-                <span>${data.medicamentosConfirmados}/${data.medicamentosEsperados}</span>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-fill ${data.percentualMedicamentos >= 70 ? 'success' : ''}" style="width: ${data.percentualMedicamentos}%"></div>
-            </div>
-        </div>
-        
-        <div class="progress-container">
-            <div class="progress-label">
-                <span>Exercícios Concluídos</span>
-                <span>${data.exerciciosConcluidos}/${data.exerciciosEsperados}</span>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-fill ${data.percentualExercicios >= 70 ? 'success' : ''}" style="width: ${data.percentualExercicios}%"></div>
-            </div>
-        </div>
-        
-        <div class="progress-container">
-            <div class="progress-label">
-                <span>Check-ins Diários</span>
-                <span>${data.checkInsRealizados}/${data.checkInsEsperados}</span>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-fill ${data.percentualCheckIns >= 70 ? 'success' : ''}" style="width: ${data.percentualCheckIns}%"></div>
-            </div>
-        </div>
-    `;
-}
-
-function initDiasTabs(containerId, onSelect) {
-    const container = document.getElementById(containerId);
-    const hoje = new Date().getDay() || 7;
-    App.diaSelecionado = hoje;
-    
-    container.innerHTML = App.diasSemana.slice(1).map((dia, i) => `
-        <button type="button" class="dia-tab ${i + 1 === hoje ? 'active' : ''}" data-dia="${i + 1}" role="tab" aria-selected="${i + 1 === hoje}">
-            ${dia}
-        </button>
-    `).join('');
-    
-    container.querySelectorAll('.dia-tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-            container.querySelectorAll('.dia-tab').forEach(t => {
-                t.classList.remove('active');
-                t.setAttribute('aria-selected', 'false');
-            });
-            tab.classList.add('active');
-            tab.setAttribute('aria-selected', 'true');
-            App.diaSelecionado = parseInt(tab.dataset.dia);
-            onSelect();
-        });
-    });
-    
-    onSelect();
-}
-
-function loadDietaCuidador() {
-    if (!App.idosoSelecionado) return;
-    
-    const result = callBridge('getDietaSemanal', App.idosoSelecionado.id);
-    const dieta = result.success && result.data ? result.data.find(d => d.diaSemana === App.diaSelecionado) : null;
-    
-    document.getElementById('dieta-cafe').value = dieta?.cafeManha || '';
-    document.getElementById('dieta-lanche-m').value = dieta?.lancheManha || '';
-    document.getElementById('dieta-almoco').value = dieta?.almoco || '';
-    document.getElementById('dieta-lanche-t').value = dieta?.lancheTarde || '';
-    document.getElementById('dieta-jantar').value = dieta?.jantar || '';
-    document.getElementById('dieta-ceia').value = dieta?.ceia || '';
-    document.getElementById('dieta-obs').value = dieta?.observacoes || '';
-}
-
-function initFormDieta() {
-    document.getElementById('form-dieta').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const btn = e.target.querySelector('button[type="submit"]');
-        
-        preventDoubleClick(btn, async () => {
-            const result = callBridge('salvarDieta', 
-                App.idosoSelecionado.id,
-                App.diaSelecionado,
-                document.getElementById('dieta-cafe').value,
-                document.getElementById('dieta-lanche-m').value,
-                document.getElementById('dieta-almoco').value,
-                document.getElementById('dieta-lanche-t').value,
-                document.getElementById('dieta-jantar').value,
-                document.getElementById('dieta-ceia').value,
-                document.getElementById('dieta-obs').value
-            );
-            
-            if (result.success) {
-                showToast('Dieta salva com sucesso!', 'success');
-            } else {
-                showToast(result.error || 'Erro ao salvar', 'error');
-            }
-        });
-    });
-}
-
-function loadMedicamentosCuidador() {
-    if (!App.idosoSelecionado) return;
-    
-    const result = callBridge('getMedicamentos', App.idosoSelecionado.id);
-    const container = document.getElementById('lista-medicamentos-cuidador');
-    
-    if (!result.success || !result.data || result.data.length === 0) {
-        container.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-state-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
-                    </svg>
-                </div>
-                <h3>Nenhum medicamento</h3>
-                <p>Adicione os medicamentos que o idoso precisa tomar.</p>
-            </div>
-        `;
-        return;
-    }
-    
-    container.innerHTML = result.data.map(med => `
-        <div class="item-card">
-            <div class="item-card-header">
-                <div class="item-card-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
-                    </svg>
-                </div>
-                <div class="item-card-info">
-                    <div class="item-card-name">${escapeHtml(med.nome)}</div>
-                    <div class="item-card-detail">${escapeHtml(med.dosagem)}</div>
-                </div>
-                ${med.horario ? `<div class="item-card-time">🕐 ${formatTime(med.horario)}</div>` : ''}
-            </div>
-            ${med.instrucoes ? `<div class="item-card-instructions">${escapeHtml(med.instrucoes)}</div>` : ''}
-            <div class="item-card-actions">
-                <button type="button" class="btn btn-secondary" onclick="editarMedicamento(${med.id})" aria-label="Editar ${escapeHtml(med.nome)}">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                    Editar
-                </button>
-                <button type="button" class="btn btn-danger" onclick="excluirMedicamento(${med.id})" aria-label="Excluir ${escapeHtml(med.nome)}">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                    Excluir
-                </button>
-            </div>
-        </div>
-    `).join('');
-}
-
-function editarMedicamento(id) {
-    const result = callBridge('getMedicamentos', App.idosoSelecionado.id);
-    const med = result.data?.find(m => m.id === id);
-    if (!med) return;
-    
-    document.getElementById('form-med-titulo').textContent = 'Editar Medicamento';
-    document.getElementById('med-id').value = med.id;
-    document.getElementById('med-nome').value = med.nome;
-    document.getElementById('med-dosagem').value = med.dosagem;
-    document.getElementById('med-horario').value = med.horario || '';
-    document.getElementById('med-frequencia').value = med.frequencia || 'diario';
-    document.getElementById('med-instrucoes').value = med.instrucoes || '';
-    document.getElementById('med-data-fim').value = med.dataFim || '';
-    
-    showScreen('screen-form-medicamento');
-}
-
-function excluirMedicamento(id) {
-    showModal('Excluir Medicamento', 'Tem certeza que deseja excluir este medicamento?', () => {
-        const result = callBridge('excluirMedicamento', id);
-        if (result.success) {
-            showToast('Medicamento excluído!', 'success');
-            loadMedicamentosCuidador();
-        } else {
-            showToast(result.error || 'Erro ao excluir', 'error');
-        }
-    }, 'Excluir');
-}
-
-function initFormMedicamento() {
-    document.getElementById('form-medicamento').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const btn = e.target.querySelector('button[type="submit"]');
-        
-        preventDoubleClick(btn, async () => {
-            const id = document.getElementById('med-id').value;
-            const nome = document.getElementById('med-nome').value;
-            const dosagem = document.getElementById('med-dosagem').value;
-            const horario = document.getElementById('med-horario').value;
-            const frequencia = document.getElementById('med-frequencia').value;
-            const instrucoes = document.getElementById('med-instrucoes').value;
-            const dataFim = document.getElementById('med-data-fim').value;
-            
-            let result;
-            if (id) {
-                result = callBridge('atualizarMedicamento', parseInt(id), nome, dosagem, horario, frequencia, instrucoes, dataFim, true);
-            } else {
-                result = callBridge('salvarMedicamento', App.idosoSelecionado.id, nome, dosagem, horario, frequencia, instrucoes, dataFim);
-            }
-            
-            if (result.success) {
-                showToast('Medicamento salvo!', 'success');
-                showScreen('screen-medicamentos-cuidador');
-                loadMedicamentosCuidador();
-            } else {
-                showToast(result.error || 'Erro ao salvar', 'error');
-            }
-        });
-    });
-}
-
-function loadExerciciosCuidador() {
-    if (!App.idosoSelecionado) return;
-    
-    const result = callBridge('getExercicios', App.idosoSelecionado.id);
-    const container = document.getElementById('lista-exercicios-cuidador');
-    
-    if (!result.success || !result.data || result.data.length === 0) {
-        container.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-state-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="5" r="3"/><path d="M12 22V8"/><path d="m5 12 7 3 7-3"/>
-                    </svg>
-                </div>
-                <h3>Nenhum exercício</h3>
-                <p>Adicione exercícios para o idoso manter a saúde em dia.</p>
-            </div>
-        `;
-        return;
-    }
-    
-    container.innerHTML = result.data.map(ex => `
-        <div class="item-card">
-            <div class="item-card-header">
-                <div class="item-card-icon" style="background: var(--color-success-light);">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--color-success);">
-                        <circle cx="12" cy="5" r="3"/><path d="M12 22V8"/><path d="m5 12 7 3 7-3"/>
-                    </svg>
-                </div>
-                <div class="item-card-info">
-                    <div class="item-card-name">${escapeHtml(ex.nome)}</div>
-                    <div class="item-card-detail">${ex.duracaoMinutos} min • ${ex.frequenciaSemanal}x por semana</div>
-                </div>
-            </div>
-            ${ex.descricao ? `<div class="item-card-instructions">${escapeHtml(ex.descricao)}</div>` : ''}
-            <div class="item-card-actions">
-                <button type="button" class="btn btn-secondary" onclick="editarExercicio(${ex.id})" aria-label="Editar ${escapeHtml(ex.nome)}">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                    Editar
-                </button>
-                <button type="button" class="btn btn-danger" onclick="excluirExercicio(${ex.id})" aria-label="Excluir ${escapeHtml(ex.nome)}">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                    Excluir
-                </button>
-            </div>
-        </div>
-    `).join('');
-}
-
-function editarExercicio(id) {
-    const result = callBridge('getExercicios', App.idosoSelecionado.id);
-    const ex = result.data?.find(e => e.id === id);
-    if (!ex) return;
-    
-    document.getElementById('form-ex-titulo').textContent = 'Editar Exercício';
-    document.getElementById('ex-id').value = ex.id;
-    document.getElementById('ex-nome').value = ex.nome;
-    document.getElementById('ex-descricao').value = ex.descricao || '';
-    document.getElementById('ex-duracao').value = ex.duracaoMinutos;
-    document.getElementById('ex-frequencia').value = ex.frequenciaSemanal;
-    document.getElementById('ex-instrucoes').value = ex.instrucoes || '';
-    
-    showScreen('screen-form-exercicio');
-}
-
-function excluirExercicio(id) {
-    showModal('Excluir Exercício', 'Tem certeza que deseja excluir este exercício?', () => {
-        const result = callBridge('excluirExercicio', id);
-        if (result.success) {
-            showToast('Exercício excluído!', 'success');
-            loadExerciciosCuidador();
-        } else {
-            showToast(result.error || 'Erro ao excluir', 'error');
-        }
-    }, 'Excluir');
-}
-
-function initFormExercicio() {
-    document.getElementById('form-exercicio').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const btn = e.target.querySelector('button[type="submit"]');
-        
-        preventDoubleClick(btn, async () => {
-            const id = document.getElementById('ex-id').value;
-            const nome = document.getElementById('ex-nome').value;
-            const descricao = document.getElementById('ex-descricao').value;
-            const duracao = parseInt(document.getElementById('ex-duracao').value);
-            const frequencia = parseInt(document.getElementById('ex-frequencia').value);
-            const instrucoes = document.getElementById('ex-instrucoes').value;
-            
-            let result;
-            if (id) {
-                result = callBridge('atualizarExercicio', parseInt(id), nome, descricao, duracao, frequencia, '', instrucoes, true);
-            } else {
-                result = callBridge('salvarExercicio', App.idosoSelecionado.id, nome, descricao, duracao, frequencia, '', instrucoes);
-            }
-            
-            if (result.success) {
-                showToast('Exercício salvo!', 'success');
-                showScreen('screen-exercicios-cuidador');
-                loadExerciciosCuidador();
-            } else {
-                showToast(result.error || 'Erro ao salvar', 'error');
-            }
-        });
-    });
-}
-
-function loadVisitasCuidador() {
-    if (!App.idosoSelecionado) return;
-    
-    const result = callBridge('getVisitas', App.idosoSelecionado.id);
-    const container = document.getElementById('lista-visitas-cuidador');
-    
-    if (!result.success || !result.data || result.data.length === 0) {
-        container.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-state-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                        <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
-                        <line x1="3" y1="10" x2="21" y2="10"/>
-                    </svg>
-                </div>
-                <h3>Nenhuma visita agendada</h3>
-                <p>Agende visitas para acompanhar o idoso pessoalmente.</p>
-            </div>
-        `;
-        return;
-    }
-    
-    container.innerHTML = result.data.map(v => `
-        <div class="item-card">
-            <div class="item-card-header">
-                <div class="item-card-icon" style="background: var(--color-turquoise-light);">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--color-turquoise);">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                        <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
-                        <line x1="3" y1="10" x2="21" y2="10"/>
-                    </svg>
-                </div>
-                <div class="item-card-info">
-                    <div class="item-card-name">${formatDate(v.data)}</div>
-                    <div class="item-card-detail">
-                        ${v.horaInicio ? formatTime(v.horaInicio) : ''} ${v.horaFim ? '- ' + formatTime(v.horaFim) : ''}
-                    </div>
-                </div>
-                <span class="badge badge-${getStatusClass(v.status)}">${getStatusText(v.status)}</span>
-            </div>
-            ${v.descricao ? `<div class="item-card-instructions">${escapeHtml(v.descricao)}</div>` : ''}
-            <div class="item-card-actions">
-                <button type="button" class="btn btn-danger" onclick="excluirVisita(${v.id})" aria-label="Excluir visita">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                    Cancelar Visita
-                </button>
-            </div>
-        </div>
-    `).join('');
-}
-
-function getStatusClass(status) {
-    switch(status) {
-        case 'AGENDADA': return 'info';
-        case 'CONFIRMADA': return 'success';
-        case 'REALIZADA': return 'success';
-        case 'CANCELADA': return 'error';
-        default: return 'info';
-    }
-}
-
-function getStatusText(status) {
-    switch(status) {
-        case 'AGENDADA': return 'Agendada';
-        case 'CONFIRMADA': return 'Confirmada';
-        case 'REALIZADA': return 'Realizada';
-        case 'CANCELADA': return 'Cancelada';
-        default: return status;
-    }
-}
-
-function excluirVisita(id) {
-    showModal('Excluir Visita', 'Tem certeza que deseja excluir esta visita?', () => {
-        const result = callBridge('excluirVisita', id);
-        if (result.success) {
-            showToast('Visita excluída!', 'success');
-            loadVisitasCuidador();
-        } else {
-            showToast(result.error || 'Erro ao excluir', 'error');
-        }
-    }, 'Excluir');
-}
-
-function initFormVisita() {
-    document.getElementById('form-visita').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const btn = e.target.querySelector('button[type="submit"]');
-        
-        preventDoubleClick(btn, async () => {
-            const data = document.getElementById('visita-data').value;
-            const horaInicio = document.getElementById('visita-hora-inicio').value;
-            const horaFim = document.getElementById('visita-hora-fim').value;
-            const descricao = document.getElementById('visita-descricao').value;
-            
-            const result = callBridge('agendarVisita', App.idosoSelecionado.id, data, horaInicio, horaFim, descricao);
-            
-            if (result.success) {
-                showToast('Visita agendada!', 'success');
-                showScreen('screen-visitas-cuidador');
-                loadVisitasCuidador();
-            } else {
-                showToast(result.error || 'Erro ao agendar', 'error');
-            }
-        });
-    });
-}
-
-function loadEditarIdoso() {
-    if (!App.idosoSelecionado) return;
-    
-    document.getElementById('edit-idoso-nome').value = App.idosoSelecionado.nome;
-    document.getElementById('edit-idoso-telefone').value = App.idosoSelecionado.telefoneEmergencia || '';
-    document.getElementById('edit-idoso-obs').value = App.idosoSelecionado.observacoes || '';
-}
-
-function initFormEditarIdoso() {
-    document.getElementById('form-editar-idoso').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const btn = e.target.querySelector('button[type="submit"]');
-        
-        preventDoubleClick(btn, async () => {
-            const nome = document.getElementById('edit-idoso-nome').value;
-            const telefone = document.getElementById('edit-idoso-telefone').value;
-            const obs = document.getElementById('edit-idoso-obs').value;
-            
-            const result = callBridge('atualizarIdoso', App.idosoSelecionado.id, nome, telefone, obs);
-            
-            if (result.success) {
-                showToast('Dados atualizados!', 'success');
-                App.idosoSelecionado.nome = nome;
-                App.idosoSelecionado.telefoneEmergencia = telefone;
-                App.idosoSelecionado.observacoes = obs;
-                document.getElementById('gestao-titulo').textContent = nome;
-                showScreen('screen-gestao-idoso');
-            } else {
-                showToast(result.error || 'Erro ao atualizar', 'error');
-            }
-        });
-    });
-    
-    document.getElementById('btn-excluir-idoso')?.addEventListener('click', () => {
-        showModal('Excluir Idoso', 
-            `<p><strong>ATENÇÃO:</strong> Esta ação não pode ser desfeita.</p>
-             <p>Todos os dados de ${escapeHtml(App.idosoSelecionado.nome)} serão excluídos permanentemente.</p>`,
-            () => {
-                const result = callBridge('excluirIdoso', App.idosoSelecionado.id);
-                if (result.success) {
-                    showToast('Idoso excluído!', 'success');
-                    App.idosoSelecionado = null;
-                    showScreen('screen-cuidador-home');
-                    loadIdososCuidador();
-                } else {
-                    showToast(result.error || 'Erro ao excluir', 'error');
-                }
-            }, 'Excluir');
-    });
-}
-
-// ==================== IDOSO ====================
-function initIdoso() {
-    document.getElementById('btn-logout-idoso')?.addEventListener('click', logout);
-    
-    document.getElementById('btn-check-meds')?.addEventListener('click', () => {
-        showScreen('screen-medicamentos-idoso');
-        loadMedicamentosIdoso();
-    });
-    
-    document.getElementById('btn-remind-later')?.addEventListener('click', () => {
-        showToast('Vamos te lembrar mais tarde!', 'info');
-    });
-    
-    document.getElementById('btn-question-yes')?.addEventListener('click', () => {
-        showToast('Ótimo! Continue assim!', 'success');
-        document.getElementById('question-card').style.display = 'none';
-    });
-    
-    document.getElementById('btn-question-no')?.addEventListener('click', () => {
-        showScreen('screen-medicamentos-idoso');
-        loadMedicamentosIdoso();
-    });
-    
-    document.getElementById('btn-dieta-idoso')?.addEventListener('click', () => {
-        showScreen('screen-dieta-idoso');
-        initDiasTabs('dias-tabs-idoso', loadDietaIdoso);
-    });
-    document.getElementById('btn-back-dieta-idoso')?.addEventListener('click', () => showScreen('screen-idoso-home'));
-    
-    document.getElementById('btn-refeicao-idoso')?.addEventListener('click', () => {
-        showScreen('screen-refeicao-idoso');
-        loadRegistrosHoje();
-    });
-    document.getElementById('btn-back-refeicao-idoso')?.addEventListener('click', () => showScreen('screen-idoso-home'));
-    initFormRefeicao();
-    
-    document.getElementById('btn-estado-idoso')?.addEventListener('click', () => {
-        showScreen('screen-estado-idoso');
-        initEstadoForm();
-    });
-    document.getElementById('btn-back-estado-idoso')?.addEventListener('click', () => showScreen('screen-idoso-home'));
-    
-    document.getElementById('btn-medicamentos-idoso')?.addEventListener('click', () => {
-        showScreen('screen-medicamentos-idoso');
-        loadMedicamentosIdoso();
-    });
-    document.getElementById('btn-back-med-idoso')?.addEventListener('click', () => showScreen('screen-idoso-home'));
-    
-    document.getElementById('btn-exercicios-idoso')?.addEventListener('click', () => {
-        showScreen('screen-exercicios-idoso');
-        loadExerciciosIdoso();
-    });
-    document.getElementById('btn-back-ex-idoso')?.addEventListener('click', () => showScreen('screen-idoso-home'));
-    
-    document.getElementById('btn-visitas-idoso')?.addEventListener('click', () => {
-        showScreen('screen-visitas-idoso');
-        loadVisitasIdoso();
-    });
-    document.getElementById('btn-back-visitas-idoso')?.addEventListener('click', () => showScreen('screen-idoso-home'));
-    
-    document.getElementById('btn-emergencia')?.addEventListener('click', () => {
-        showScreen('screen-emergencia');
-    });
-    document.getElementById('btn-back-emergencia')?.addEventListener('click', () => showScreen('screen-idoso-home'));
-    initEmergencia();
-}
-
-function loadDietaIdoso() {
-    if (!App.usuario) return;
-    
-    const result = callBridge('getDietaSemanal', App.usuario.id);
-    const container = document.getElementById('dieta-conteudo-idoso');
-    
-    const dieta = result.success && result.data ? result.data.find(d => d.diaSemana === App.diaSelecionado) : null;
-    
-    if (!dieta) {
-        container.innerHTML = '<div class="empty-state"><p>Nenhuma dieta definida para este dia.</p></div>';
-        return;
-    }
-    
-    const refeicoes = [
-        { nome: 'Café da Manhã', valor: dieta.cafeManha },
-        { nome: 'Lanche da Manhã', valor: dieta.lancheManha },
-        { nome: 'Almoço', valor: dieta.almoco },
-        { nome: 'Lanche da Tarde', valor: dieta.lancheTarde },
-        { nome: 'Jantar', valor: dieta.jantar },
-        { nome: 'Ceia', valor: dieta.ceia }
-    ].filter(r => r.valor);
-    
-    if (refeicoes.length === 0) {
-        container.innerHTML = '<div class="empty-state"><p>Nenhuma refeição definida para este dia.</p></div>';
-        return;
-    }
-    
-    container.innerHTML = refeicoes.map(r => `
-        <div class="refeicao-item">
-            <div class="refeicao-titulo">${r.nome}</div>
-            <div class="refeicao-descricao">${escapeHtml(r.valor)}</div>
-        </div>
-    `).join('') + (dieta.observacoes ? `
-        <div class="refeicao-item" style="background-color: #FFF3E0;">
-            <div class="refeicao-titulo">Observações</div>
-            <div class="refeicao-descricao">${escapeHtml(dieta.observacoes)}</div>
-        </div>
-    ` : '');
-}
-
-function loadRegistrosHoje() {
-    if (!App.usuario) return;
-    
-    const result = callBridge('getRegistrosRefeicaoHoje', App.usuario.id);
-    const container = document.getElementById('registros-hoje');
-    
-    if (!result.success || !result.data || result.data.length === 0) {
-        container.innerHTML = '<p style="color: var(--color-text-secondary);">Nenhum registro hoje.</p>';
-        return;
-    }
-    
-    const tiposRefeicao = {
-        'cafe_manha': 'Café da Manhã',
-        'lanche_manha': 'Lanche da Manhã',
-        'almoco': 'Almoço',
-        'lanche_tarde': 'Lanche da Tarde',
-        'jantar': 'Jantar',
-        'ceia': 'Ceia'
-    };
-    
-    container.innerHTML = result.data.map(r => `
-        <div class="refeicao-item">
-            <div class="refeicao-titulo">${tiposRefeicao[r.tipoRefeicao] || 'Refeição'} - ${formatTime(r.hora)}</div>
-            <div class="refeicao-descricao">${escapeHtml(r.descricao)}</div>
-        </div>
-    `).join('');
-}
-
-function initFormRefeicao() {
-    document.getElementById('form-refeicao').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const btn = e.target.querySelector('button[type="submit"]');
-        
-        preventDoubleClick(btn, async () => {
-            const tipo = document.getElementById('refeicao-tipo').value;
-            const descricao = document.getElementById('refeicao-descricao').value;
-            const obs = document.getElementById('refeicao-obs').value;
-            
-            const result = callBridge('registrarRefeicao', App.usuario.id, tipo, descricao, obs);
-            
-            if (result.success) {
-                showToast('Refeição registrada!', 'success');
-                e.target.reset();
-                loadRegistrosHoje();
-            } else {
-                showToast(result.error || 'Erro ao registrar', 'error');
-            }
-        });
-    });
-}
-
-function initEstadoForm() {
-    let estadoHumor = null;
-    let estadoFisico = null;
-    
-    document.querySelectorAll('#estado-humor-grid .estado-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('#estado-humor-grid .estado-btn').forEach(b => {
-                b.classList.remove('selected');
-                b.setAttribute('aria-pressed', 'false');
-            });
-            btn.classList.add('selected');
-            btn.setAttribute('aria-pressed', 'true');
-            estadoHumor = btn.dataset.valor;
-        });
-    });
-    
-    document.querySelectorAll('#estado-fisico-grid .estado-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('#estado-fisico-grid .estado-btn').forEach(b => {
-                b.classList.remove('selected');
-                b.setAttribute('aria-pressed', 'false');
-            });
-            btn.classList.add('selected');
-            btn.setAttribute('aria-pressed', 'true');
-            estadoFisico = btn.dataset.valor;
-        });
-    });
-    
-    document.getElementById('form-estado').addEventListener('submit', (e) => {
-        e.preventDefault();
-        
-        if (!estadoHumor) {
-            showToast('Selecione como está seu humor', 'error');
-            return;
-        }
-        
-        if (!estadoFisico) {
-            showToast('Selecione como está fisicamente', 'error');
-            return;
-        }
-        
-        const btn = e.target.querySelector('button[type="submit"]');
-        
-        preventDoubleClick(btn, async () => {
-            const obs = document.getElementById('estado-obs').value;
-            const result = callBridge('registrarEstado', App.usuario.id, estadoHumor, estadoFisico, obs);
-            
-            if (result.success) {
-                showToast('Estado registrado!', 'success');
-                showScreen('screen-idoso-home');
-            } else {
-                showToast(result.error || 'Erro ao registrar', 'error');
-            }
-        });
-    });
-}
-
-function loadMedicamentosIdoso() {
-    if (!App.usuario) return;
-    
-    const result = callBridge('getMedicamentos', App.usuario.id);
-    const container = document.getElementById('lista-medicamentos-idoso');
-    
-    if (!result.success || !result.data || result.data.length === 0) {
-        container.innerHTML = '<div class="empty-state"><p>Nenhum medicamento cadastrado.</p></div>';
-        return;
-    }
-    
-    container.innerHTML = result.data.map(med => {
-        const confirmadoResult = callBridge('isMedicamentoConfirmadoHoje', App.usuario.id, med.id);
-        const confirmado = confirmadoResult.success && confirmadoResult.data;
-        
-        return `
-            <div class="check-item ${confirmado ? 'confirmed' : ''}">
-                <button type="button" class="check-btn ${confirmado ? 'checked' : ''}" 
-                        data-id="${med.id}" 
-                        ${confirmado ? 'disabled' : ''}
-                        aria-label="${confirmado ? 'Já tomado' : 'Marcar como tomado'} ${escapeHtml(med.nome)}">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20,6 9,17 4,12"/></svg>
-                </button>
-                <div class="check-content">
-                    <div class="check-title">${escapeHtml(med.nome)}</div>
-                    <div class="check-subtitle">
-                        ${escapeHtml(med.dosagem)} ${med.horario ? '• ' + formatTime(med.horario) : ''}
-                    </div>
-                    ${med.instrucoes ? `<div class="check-subtitle">${escapeHtml(med.instrucoes)}</div>` : ''}
-                </div>
-            </div>
-        `;
-    }).join('');
-    
-    container.querySelectorAll('.check-btn:not(.checked)').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const id = parseInt(btn.dataset.id);
-            const result = callBridge('confirmarMedicamento', App.usuario.id, id);
-            
-            if (result.success) {
-                showToast('Medicamento confirmado!', 'success');
-                loadMedicamentosIdoso();
-            } else {
-                showToast(result.error || 'Erro ao confirmar', 'error');
-            }
-        });
-    });
-}
-
-function loadExerciciosIdoso() {
-    if (!App.usuario) return;
-    
-    const result = callBridge('getExercicios', App.usuario.id);
-    const container = document.getElementById('lista-exercicios-idoso');
-    
-    if (!result.success || !result.data || result.data.length === 0) {
-        container.innerHTML = '<div class="empty-state"><p>Nenhum exercício cadastrado.</p></div>';
-        return;
-    }
-    
-    container.innerHTML = result.data.map(ex => {
-        const concluidoResult = callBridge('isExercicioConcluidoHoje', App.usuario.id, ex.id);
-        const concluido = concluidoResult.success && concluidoResult.data;
-        
-        return `
-            <div class="check-item ${concluido ? 'confirmed' : ''}">
-                <button type="button" class="check-btn ${concluido ? 'checked' : ''}" 
-                        data-id="${ex.id}" 
-                        ${concluido ? 'disabled' : ''}
-                        aria-label="${concluido ? 'Já feito' : 'Marcar como feito'} ${escapeHtml(ex.nome)}">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20,6 9,17 4,12"/></svg>
-                </button>
-                <div class="check-content">
-                    <div class="check-title">${escapeHtml(ex.nome)}</div>
-                    <div class="check-subtitle">${ex.duracaoMinutos} minutos</div>
-                    ${ex.descricao ? `<div class="check-subtitle">${escapeHtml(ex.descricao)}</div>` : ''}
-                </div>
-            </div>
-        `;
-    }).join('');
-    
-    container.querySelectorAll('.check-btn:not(.checked)').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const id = parseInt(btn.dataset.id);
-            const result = callBridge('confirmarExercicio', App.usuario.id, id, '');
-            
-            if (result.success) {
-                showToast('Exercício concluído!', 'success');
-                loadExerciciosIdoso();
-            } else {
-                showToast(result.error || 'Erro ao confirmar', 'error');
-            }
-        });
-    });
-}
-
-function loadVisitasIdoso() {
-    if (!App.usuario) return;
-    
-    const result = callBridge('getProximasVisitas', App.usuario.id);
-    const container = document.getElementById('lista-visitas-idoso');
-    
-    if (!result.success || !result.data || result.data.length === 0) {
-        container.innerHTML = '<div class="empty-state"><p>Nenhuma visita agendada.</p></div>';
-        return;
-    }
-    
-    container.innerHTML = result.data.map(v => `
-        <div class="card" style="margin-bottom: 8px;">
-            <strong>${formatDate(v.data)}</strong>
-            <span class="badge badge-${getStatusClass(v.status)}">${getStatusText(v.status)}</span>
-            <p style="color: var(--color-text-secondary); margin: 4px 0;">
-                ${v.horaInicio ? formatTime(v.horaInicio) : ''} ${v.horaFim ? '- ' + formatTime(v.horaFim) : ''}
-            </p>
-            ${v.descricao ? `<p>${escapeHtml(v.descricao)}</p>` : ''}
-        </div>
-    `).join('');
-}
-
-function initEmergencia() {
-    document.getElementById('btn-confirmar-emergencia')?.addEventListener('click', () => {
-        if (!App.usuario) return;
-        
-        const telefoneResult = callBridge('getTelefoneEmergencia', App.usuario.id);
-        const telefone = telefoneResult.success ? telefoneResult.data : '192';
-        
-        showModal('Confirmar Emergência', 
-            `<p>Você está prestes a registrar um alerta de emergência e será direcionado para ligar para:</p>
-             <p style="font-size: 1.5em; font-weight: bold; text-align: center; margin: 16px 0;">${telefone}</p>
-             <p><strong>Deseja continuar?</strong></p>`,
-            () => {
-                const alertaResult = callBridge('criarAlertaEmergencia', App.usuario.id, 'Emergência acionada pelo usuário');
-                
-                if (alertaResult.success) {
-                    window.location.href = `tel:${telefone}`;
-                } else {
-                    showToast('Alerta registrado. Abra o discador manualmente.', 'info');
-                }
-            }, 'Ligar Agora');
-    });
+function generateId() {
+    return Date.now();
 }
