@@ -1,0 +1,46 @@
+name: Release APK
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish release
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: CuidarApp
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v4
+
+      - name: Build Debug APK
+        run: chmod +x ./gradlew && ./gradlew assembleDebug test
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: CuidarApp ${{ github.ref_name }}
+          body_path: CuidarApp/docs/RELEASE_NOTES.md
+          make_latest: true
+          files: |
+            CuidarApp/app/build/outputs/apk/debug/app-debug.apk
+            CuidarApp/docs/apresentacao/CuidarApp_Apresentacao.pdf
+            CuidarApp/docs/apresentacao/CuidarApp_Apresentacao.pptx
