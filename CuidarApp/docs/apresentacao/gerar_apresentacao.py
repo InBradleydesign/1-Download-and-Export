@@ -188,7 +188,7 @@ heart.shadow.inherit = False
 text(s, 0.9, 2.45, 7.5, 1.0, "CuidarApp", size=60, color=WHITE, bold=True)
 text(s, 0.9, 3.55, 7.0, 1.2, "Cuidado integral do idoso: remédios, alimentação, hidratação, exercícios e segurança em um só aplicativo.", size=20, color=WHITE)
 text(s, 0.9, 5.0, 7.0, 0.4, "100% offline  •  Um aparelho, dois perfis  •  Baseado em evidências clínicas", size=14, color=PRIMARY_LIGHT, bold=True)
-text(s, 0.9, 6.55, 7.0, 0.4, "Apresentação de funcionalidades • Versão 1.3", size=12, color=PRIMARY_LIGHT)
+text(s, 0.9, 6.55, 7.0, 0.4, "Apresentação de funcionalidades • Versão 1.4", size=12, color=PRIMARY_LIGHT)
 phone(s, "01-inicio", 8.0, 0.75, 6.0)
 phone(s, "02-idoso-hoje", 10.6, 1.05, 5.4)
 
@@ -249,7 +249,7 @@ screen_slide("Acesso", "Tela inicial: quem está usando?",
 ])
 
 screen_slide("Perfil do idoso", "\"Hoje\": tudo o que importa em uma tela",
-             "Saudação pelo horário, data por extenso e categorias grandes para navegar.",
+             "Saudação pelo horário, data por extenso e um menu inferior simples: Hoje, Remédios, Exercícios, Comida e Humor.",
              ["02-idoso-hoje", "03-idoso-hoje-tarefas"], [
     ("Anel de progresso do dia", "Mostra quanto da rotina já foi cumprida e quantas tarefas faltam.", PRIMARY_LIGHT, PRIMARY),
     ("Copos de água", "Um toque no + a cada copo. A meta diária é definida pelo cuidador.", WATER_LIGHT, WATER),
@@ -281,14 +281,14 @@ screen_slide("Perfil do idoso", "Como estou e emergência",
     ("Humor em 5 carinhas", "Check-in diário simples. Humor baixo avisa o cuidador (sintomas depressivos caem 46,5% com acompanhamento).", AMBER_LIGHT, AMBER),
     ("Sintomas do dia", "Dor, tontura, cansaço, falta de apetite, sono ruim ou sede, marcados com um toque.", PRIMARY_LIGHT, PRIMARY),
     ("\"Tive uma queda\"", "Registra a queda, alerta o cuidador e, se for preciso, abre a tela de emergência.", RED_LIGHT, RED),
-    ("SOS sempre à mão", "Botão central na barra inferior: liga para o 192 ou direto para o cuidador.", RED_LIGHT, RED),
+    ("SOS sempre à mão", "Botão vermelho no topo de todas as telas do idoso: liga para o 192 ou direto para o cuidador.", RED_LIGHT, RED),
 ])
 
 screen_slide("Perfil do cuidador", "Painel do cuidador",
-             "Visão do dia em segundos: alertas, ações rápidas e progresso.",
+             "Visão do dia em segundos: alertas, progresso de hoje e semana.",
              ["11-cuidador-painel", "12-cuidador-progresso"], [
     ("Alertas em destaque", "Quedas, mal-estar no exercício e humor baixo aparecem no topo até serem marcados como vistos.", RED_LIGHT, RED),
-    ("Ações rápidas", "Cadastrar medicamento, exercício, visita ou editar a dieta em um toque.", PRIMARY_LIGHT, PRIMARY),
+    ("Menu por área", "Painel, Remédios, Exercícios, Dieta e Visitas na barra inferior; configurações na engrenagem do topo.", PRIMARY_LIGHT, PRIMARY),
     ("Progresso de hoje", "Remédios, exercícios, refeições e água com barras de progresso.", GREEN_LIGHT, GREEN),
     ("Humor e sintomas", "O que o idoso relatou hoje, sem precisar perguntar.", AMBER_LIGHT, AMBER),
 ])
@@ -307,8 +307,8 @@ screen_slide("Perfil do cuidador", "Cadastro rápido e guiado",
              ["14-novo-exercicio", "16-dieta"], [
     ("Sugestões de exercícios", "Seis exercícios do programa Vivifrail prontos para usar: um toque preenche o formulário.", GREEN_LIGHT, GREEN),
     ("Dias da semana", "Escolha os dias de cada exercício; o app recomenda de 3 a 5 vezes por semana.", PRIMARY_LIGHT, PRIMARY),
-    ("Dieta da semana", "Café, almoço, lanche e jantar por dia, com botão para copiar o cardápio para a semana toda.", AMBER_LIGHT, AMBER),
-    ("Lembrete de proteína", "Exemplos de alimentos proteicos e meta diária no topo da dieta.", AMBER_LIGHT, AMBER),
+    ("Dieta da semana", "Café, almoço, lanche e jantar por dia, salvos automaticamente, com opção de copiar o cardápio para a semana toda.", AMBER_LIGHT, AMBER),
+    ("Lembrete de proteína", "Exemplos de alimentos proteicos e meta diária junto da dieta.", AMBER_LIGHT, AMBER),
 ])
 
 slide = screen_slide("Configurações", "Personalização e acessibilidade",
@@ -344,7 +344,7 @@ for i, (evidence, improvement) in enumerate(rows):
     text(s, 0.95, y + 0.11, 5.3, 0.3, evidence, size=12, bold=True)
     text(s, 6.45, y + 0.11, 6.0, 0.3, improvement, size=12, color=TEXT_2)
     y += 0.5
-text(s, 0.7, 6.65, 11.9, 0.3, "Também corrigido: edição de nomes, senha e telefones (o WebView não exibia as janelas antigas), botão voltar do Android, visitas do dia e navegação inferior.",
+text(s, 0.7, 6.65, 11.9, 0.3, "Também corrigido: menu inferior funcional e sem duplicidades, edição de nomes, senha e telefones, check-in de humor, botão voltar do Android e visual com bordas mais leves.",
      size=11, color=TEXT_2)
 footer(s)
 

@@ -118,7 +118,7 @@ def main():
         page.click("#elderly-nav [data-category=medication]")
         shot("04-idoso-remedios")
 
-        page.click(".category-pill[data-category=exercise]")
+        page.click("#elderly-nav [data-category=exercise]")
         shot("05-idoso-exercicios")
         page.click("[data-task-type=exercise]")
         shot("06-feedback-exercicio")
@@ -142,6 +142,8 @@ def main():
         assert page.is_visible("#screen-elderly"), "voltar da emergência falhou"
 
         assert page.evaluate("window.CuidarBack()") is True
+        assert page.is_visible("#screen-elderly") and page.evaluate("App.currentCategory") == "all", "voltar do Android não voltou para Hoje"
+        assert page.evaluate("window.CuidarBack()") is True
         assert page.is_visible("#screen-home"), "voltar do Android não levou ao início"
 
         page.click("#btn-enter-caregiver")
@@ -157,18 +159,21 @@ def main():
         page.evaluate("document.getElementById('caregiver-content').scrollTop = 1020")
         shot("13-cuidador-semana")
 
-        page.click("#btn-add-exercise")
+        page.click("#caregiver-nav [data-tab=exercise]")
+        shot("15-lista-exercicios")
+        page.click("[data-edit=exercise]:not([data-id])")
         page.click("[data-preset='2']")
         shot("14-novo-exercicio")
         page.click("#screen-edit [data-back]")
+        assert page.is_visible("#screen-caregiver"), "voltar do formulário falhou"
 
-        page.click("#caregiver-nav [data-action=exercise-list]")
-        shot("15-lista-exercicios")
-        page.click("#screen-edit [data-back]")
-
-        page.click("#btn-edit-diet")
+        page.click("#caregiver-nav [data-tab=diet]")
         shot("16-dieta")
-        page.click("#screen-edit [data-back]")
+        page.click("#caregiver-nav [data-tab=medication]")
+        shot("21-cuidador-remedios")
+        page.click("#caregiver-nav [data-tab=visit]")
+        shot("22-cuidador-visitas")
+        page.click("#caregiver-nav [data-tab=panel]")
 
         page.click("#btn-caregiver-settings")
         shot("17-configuracoes")
