@@ -4,12 +4,17 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.webkit.ValueCallback;
+import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import androidx.activity.OnBackPressedCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.webkit.WebViewAssetLoader;
 
@@ -20,6 +25,15 @@ public class MainActivity extends AppCompatActivity {
     private WebView webView;
     private AppBridge bridge;
     private WebViewAssetLoader assetLoader;
+    private ValueCallback<Uri[]> pendingFileCallback;
+
+    private final ActivityResultLauncher<String> imagePicker =
+        registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
+            if (pendingFileCallback != null) {
+                pendingFileCallback.onReceiveValue(uri != null ? new Uri[]{uri} : null);
+                pendingFileCallback = null;
+            }
+        });
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
         
         setupAssetLoader();
         setupWebView();
+        setupBackNavigation();
         
         webView.loadUrl("https://appassets.androidplatform.net/assets/web/index.html");
     }
@@ -85,20 +100,47 @@ public class MainActivity extends AppCompatActivity {
                 return !isAllowedOrigin(uri);
             }
         });
+
+        webView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> filePathCallback,
+                                             FileChooserParams fileChooserParams) {
+                if (pendingFileCallback != null) {
+                    pendingFileCallback.onReceiveValue(null);
+                }
+                pendingFileCallback = filePathCallback;
+                try {
+                    imagePicker.launch("image/*");
+                } catch (Exception e) {
+                    pendingFileCallback = null;
+                    return false;
+                }
+                return true;
+            }
+        });
+    }
+
+    // A navegação é feita pela SPA; o JS decide se consome o "voltar" ou se o app deve fechar.
+    private void setupBackNavigation() {
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                webView.evaluateJavascript(
+                    "(window.CuidarBack ? window.CuidarBack() : false)",
+                    result -> {
+                        if (!"true".equals(result)) {
+                            setEnabled(false);
+                            getOnBackPressedDispatcher().onBackPressed();
+                            setEnabled(true);
+                        }
+                    });
+            }
+        });
     }
     
     private boolean isAllowedOrigin(Uri uri) {
         String host = uri.getHost();
         return "appassets.androidplatform.net".equals(host);
-    }
-    
-    @Override
-    public void onBackPressed() {
-        if (webView.canGoBack()) {
-            webView.goBack();
-        } else {
-            super.onBackPressed();
-        }
     }
     
     @Override
