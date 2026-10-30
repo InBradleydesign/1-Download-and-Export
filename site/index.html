@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CuidarApp — Cuidado diário do idoso, simples e sem internet</title>
+    <meta name="description" content="Aplicativo gratuito para idosos e cuidadores: remédios, água, alimentação com proteína, exercícios seguros, humor e SOS. Funciona sem internet e os dados ficam só no celular.">
+    <meta name="theme-color" content="#7C5CFC">
+    <meta property="og:title" content="CuidarApp — Cuidado diário do idoso">
+    <meta property="og:description" content="Remédios, hidratação, alimentação, exercícios e humor em um só app. Gratuito, offline e privado.">
+    <meta property="og:image" content="img/idoso-hoje.webp">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237C5CFC' stroke-width='2.4'%3E%3Cpath d='M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="topbar" id="topbar">
+        <div class="container topbar-inner">
+            <a href="#inicio" class="brand" aria-label="CuidarApp, início">
+                <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span>
+                CuidarApp
+            </a>
+            <nav class="menu" id="menu" aria-label="Seções">
+                <a href="#por-que">Por que</a>
+                <a href="#funcionalidades">Funcionalidades</a>
+                <a href="#ciencia">Ciência</a>
+                <a href="#beneficios">Benefícios</a>
+                <a href="#privacidade">Privacidade</a>
+                <a href="#perguntas">Dúvidas</a>
+            </nav>
+            <a class="btn btn-primary btn-sm" href="#baixar">Baixar grátis</a>
+            <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menu" aria-expanded="false" aria-controls="menu">
+                <span></span><span></span>
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <!-- HERO -->
+        <section class="hero" id="inicio">
+            <div class="container hero-grid">
+                <div class="hero-text">
+                    <span class="eyebrow">Gratuito · Funciona sem internet · Android</span>
+                    <h1>O cuidado de todo dia, <span class="accent">simples para quem é cuidado</span> e tranquilo para quem cuida.</h1>
+                    <p class="lead">Remédios, água, refeições com proteína, exercícios seguros e humor em um só lugar. O idoso marca o que fez com um toque; o cuidador acompanha, recebe alertas e ajusta a rotina.</p>
+                    <div class="hero-actions">
+                        <a class="btn btn-primary btn-lg" href="https://github.com/InBradleydesign/1-Download-and-Export/releases/latest/download/app-debug.apk" data-download>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            Baixar para Android
+                        </a>
+                        <a class="btn btn-ghost btn-lg" href="#funcionalidades">Ver como funciona</a>
+                    </div>
+                    <p class="hero-meta">Versão 1.4 · 3,5 MB · Android 8.0 ou superior · Sem cadastro</p>
+                </div>
+                <div class="hero-visual" aria-hidden="true">
+                    <div class="blob"></div>
+                    <figure class="phone phone-back"><img src="img/cuidador-painel.webp" alt="" width="585" height="1266"></figure>
+                    <figure class="phone phone-front"><img src="img/idoso-hoje.webp" alt="" width="585" height="1266"></figure>
+                    <div class="float-chip chip-a"><span>💧</span>Mais um copo!</div>
+                    <div class="float-chip chip-b"><span>💊</span>Remédio tomado</div>
+                </div>
+            </div>
+            <div class="container trust">
+                <div><strong>2 perfis</strong><span>idoso e cuidador no mesmo aparelho</span></div>
+                <div><strong>100% offline</strong><span>funciona sem internet</span></div>
+                <div><strong>0 cadastros</strong><span>sem e-mail, sem conta, sem nuvem</span></div>
+                <div><strong>Feito com base em pesquisa</strong><span>diretrizes de nutrição e exercício</span></div>
+            </div>
+        </section>
+
+        <!-- POR QUE -->
+        <section class="section" id="por-que">
+            <div class="container">
+                <div class="section-head">
+                    <span class="eyebrow">Por que isso importa</span>
+                    <h2>O Brasil envelhece rápido, e o cuidado diário ainda é fragmentado</h2>
+                    <p>Os números da pesquisa que deu origem ao CuidarApp mostram onde a rotina mais falha e onde um acompanhamento simples faz diferença.</p>
+                </div>
+                <div class="stats">
+                    <article class="stat">
+                        <span class="stat-value">15,8%</span>
+                        <h3>da população tem 60 anos ou mais</h3>
+                        <p>São 32,1 milhões de pessoas, segundo o Censo IBGE 2022.</p>
+                    </article>
+                    <article class="stat">
+                        <span class="stat-value">40,9%</span>
+                        <h3>dos idosos são insuficientemente ativos</h3>
+                        <p>O sedentarismo acelera a perda de força e aumenta o risco de quedas (VIGITEL 2023).</p>
+                    </article>
+                    <article class="stat">
+                        <span class="stat-value">22–28%</span>
+                        <h3>estão em risco de desnutrição</h3>
+                        <p>Entre idosos acompanhados em ambulatório, segundo o inquérito IBRANUTRI.</p>
+                    </article>
+                    <article class="stat">
+                        <span class="stat-value">15–18%</span>
+                        <h3>têm sarcopenia</h3>
+                        <p>Perda de massa e força muscular que compromete a autonomia (critérios EWGSOP2).</p>
+                    </article>
+                </div>
+                <div class="callout">
+                    <div>
+                        <h3>O problema das soluções atuais</h3>
+                        <p>A maioria dos aplicativos cuida de uma parte só da rotina — o remédio, a caloria ou o exercício —, depende de internet e tem telas carregadas. Entre usuários com mais de 65 anos, <strong>a taxa de abandono passa de 70%</strong>.</p>
+                    </div>
+                    <div>
+                        <h3>A resposta do CuidarApp</h3>
+                        <p>Reunir a tríade que a pesquisa aponta como essencial — <strong>proteína, hidratação e exercício multicomponente</strong> — junto com remédios, humor e segurança, em uma interface grande, clara e que funciona sem internet.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PILARES -->
+        <section class="section section-tint">
+            <div class="container">
+                <div class="section-head">
+                    <span class="eyebrow">A solução</span>
+                    <h2>Um bloco de notas de cuidados, simples e interativo</h2>
+                </div>
+                <div class="pillars">
+                    <article class="pillar">
+                        <span class="pillar-icon violet">👥</span>
+                        <h3>Um aparelho, dois perfis</h3>
+                        <p>O idoso entra com um toque. O cuidador acessa com senha de 4 dígitos para cadastrar e acompanhar.</p>
+                    </article>
+                    <article class="pillar">
+                        <span class="pillar-icon green">🥗</span>
+                        <h3>A tríade da saúde</h3>
+                        <p>Proteína nas refeições, água ao longo do dia e exercícios de força, equilíbrio, marcha e flexibilidade.</p>
+                    </article>
+                    <article class="pillar">
+                        <span class="pillar-icon red">🚨</span>
+                        <h3>Segurança e SOS</h3>
+                        <p>Botão de emergência sempre visível, registro de quedas e alerta de mal-estar após o exercício.</p>
+                    </article>
+                    <article class="pillar">
+                        <span class="pillar-icon blue">🔒</span>
+                        <h3>Offline e privado</h3>
+                        <p>Sem cadastro e sem nuvem. Os dados de saúde ficam somente no celular, como pede a LGPD.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- FUNCIONALIDADES -->
+        <section class="section" id="funcionalidades">
+            <div class="container">
+                <div class="section-head">
+                    <span class="eyebrow">Funcionalidades</span>
+                    <h2>Tudo o que a rotina precisa, em telas que qualquer pessoa entende</h2>
+                    <p>Escolha um perfil e toque em cada recurso para ver a tela do aplicativo.</p>
+                </div>
+
+                <div class="segmented" role="tablist" aria-label="Perfil">
+                    <button class="segmented-btn active" role="tab" aria-selected="true" data-profile="idoso">Para o idoso</button>
+                    <button class="segmented-btn" role="tab" aria-selected="false" data-profile="cuidador">Para o cuidador</button>
+                </div>
+
+                <div class="showcase" data-showcase="idoso">
+                    <div class="feature-list" role="tablist" aria-label="Recursos para o idoso">
+                        <button class="feature active" data-img="img/idoso-hoje.webp" data-alt="Tela Hoje do idoso">
+                            <span class="feature-icon violet">☀️</span>
+                            <span><strong>Hoje</strong>Anel de progresso do dia e todas as tarefas em ordem de horário, com um botão grande para marcar como feito.</span>
+                        </button>
+                        <button class="feature" data-img="img/idoso-remedios.webp" data-alt="Remédios do dia">
+                            <span class="feature-icon blue">💊</span>
+                            <span><strong>Remédios</strong>Nome, dose, horário e instruções de cada remédio. Menos esquecimentos e nada de tomar duas vezes.</span>
+                        </button>
+                        <button class="feature" data-img="img/idoso-alimentacao.webp" data-alt="Água e refeições">
+                            <span class="feature-icon amber">🥛</span>
+                            <span><strong>Água e refeições</strong>Copos de água com meta diária e o cardápio do dia montado pelo cuidador, com lembrete de proteína.</span>
+                        </button>
+                        <button class="feature" data-img="img/idoso-exercicios.webp" data-alt="Exercícios do dia">
+                            <span class="feature-icon green">🏃</span>
+                            <span><strong>Exercícios seguros</strong>Força, equilíbrio, marcha e flexibilidade, com instruções e meta de 3 a 5 dias por semana.</span>
+                        </button>
+                        <button class="feature" data-img="img/feedback-exercicio.webp" data-alt="Pergunta após o exercício">
+                            <span class="feature-icon red">💬</span>
+                            <span><strong>“Como você se sentiu?”</strong>Depois de cada exercício. Tontura ou dor avisam o cuidador e oferecem o SOS na hora.</span>
+                        </button>
+                        <button class="feature" data-img="img/idoso-humor.webp" data-alt="Humor e sintomas">
+                            <span class="feature-icon amber">🙂</span>
+                            <span><strong>Humor e sintomas</strong>Cinco carinhas, sintomas do dia e o botão “Tive uma queda”. Humor baixo gera alerta.</span>
+                        </button>
+                        <button class="feature" data-img="img/emergencia.webp" data-alt="Tela de emergência">
+                            <span class="feature-icon red">📞</span>
+                            <span><strong>SOS</strong>Sempre no topo da tela: liga para o 192 ou direto para o cuidador.</span>
+                        </button>
+                    </div>
+                    <figure class="phone showcase-phone"><img src="img/idoso-hoje.webp" alt="Tela Hoje do idoso" width="585" height="1266"></figure>
+                </div>
+
+                <div class="showcase" data-showcase="cuidador" hidden>
+                    <div class="feature-list" role="tablist" aria-label="Recursos para o cuidador">
+                        <button class="feature active" data-img="img/cuidador-painel.webp" data-alt="Painel do cuidador">
+                            <span class="feature-icon violet">📋</span>
+                            <span><strong>Painel do dia</strong>Alertas de queda, mal-estar e humor baixo no topo, e o progresso de remédios, exercícios, refeições e água.</span>
+                        </button>
+                        <button class="feature" data-img="img/cuidador-progresso.webp" data-alt="Relatório dos últimos 7 dias">
+                            <span class="feature-icon blue">📊</span>
+                            <span><strong>Relatório semanal</strong>Adesão de cada dia, humor da semana e médias prontas para mostrar na consulta.</span>
+                        </button>
+                        <button class="feature" data-img="img/novo-exercicio.webp" data-alt="Cadastro de exercício">
+                            <span class="feature-icon green">✨</span>
+                            <span><strong>Cadastro guiado</strong>Sugestões prontas de exercícios e escolha dos dias da semana em poucos toques.</span>
+                        </button>
+                        <button class="feature" data-img="img/dieta.webp" data-alt="Dieta da semana">
+                            <span class="feature-icon amber">🍽️</span>
+                            <span><strong>Dieta da semana</strong>Café, almoço, lanche e jantar por dia, salvos automaticamente e com meta de proteína pelo peso.</span>
+                        </button>
+                        <button class="feature" data-img="img/configuracoes.webp" data-alt="Configurações">
+                            <span class="feature-icon violet">⚙️</span>
+                            <span><strong>Ajustes do cuidado</strong>Nomes e fotos, peso, meta de água, contatos de SOS e senha, tudo em um só lugar.</span>
+                        </button>
+                        <button class="feature" data-img="img/alto-contraste.webp" data-alt="Modo de alto contraste com letra maior">
+                            <span class="feature-icon blue">🔍</span>
+                            <span><strong>Acessibilidade</strong>Letra de 80% a 150%, alto contraste e animações que podem ser desligadas.</span>
+                        </button>
+                    </div>
+                    <figure class="phone showcase-phone"><img src="img/cuidador-painel.webp" alt="Painel do cuidador" width="585" height="1266"></figure>
+                </div>
+            </div>
+        </section>
+
+        <!-- CIÊNCIA -->
+        <section class="section section-dark" id="ciencia">
+            <div class="container">
+                <div class="section-head">
+                    <span class="eyebrow">Baseado em evidências</span>
+                    <h2>Cada recurso nasceu de uma recomendação da pesquisa</h2>
+                    <p>Acompanhar nutrição e exercício juntos traz resultados que nenhum dos dois alcança sozinho.</p>
+                </div>
+                <div class="results">
+                    <div class="result"><span>+24,8%</span><p>de força de preensão com nutrição e exercício combinados</p></div>
+                    <div class="result"><span>+19,6%</span><p>na velocidade de marcha após 24 semanas</p></div>
+                    <div class="result"><span>até 34%</span><p>menos quedas com exercício multicomponente</p></div>
+                    <div class="result"><span>78,4%</span><p>de adesão ao tratamento com monitoramento digital, contra 42,5% no papel</p></div>
+                </div>
+                <div class="evidence">
+                    <div class="evidence-row evidence-head"><span>O que a pesquisa mostra</span><span>O que o CuidarApp faz</span></div>
+                    <div class="evidence-row"><span>Com a idade a sede diminui (hipodipsia), o que aumenta o risco de confusão e infecção</span><span>Contador de copos com meta diária e lembrete para beber água mesmo sem sede</span></div>
+                    <div class="evidence-row"><span>Idosos precisam de 1,0 a 1,5 g de proteína por kg ao dia (ESPEN, PROT-AGE)</span><span>Meta de proteína calculada pelo peso e pela fragilidade, com cardápio diário</span></div>
+                    <div class="evidence-row"><span>Força, equilíbrio, marcha e flexibilidade de 3 a 5 vezes por semana reduzem quedas (OMS)</span><span>Exercícios por tipo e dia da semana, sugestões prontas e meta semanal visível</span></div>
+                    <div class="evidence-row"><span>Tontura e dor durante o exercício são sinais de alerta</span><span>Pergunta após cada exercício, alerta ao cuidador e atalho para o SOS</span></div>
+                    <div class="evidence-row"><span>Acompanhamento reduz sintomas depressivos em até 46,5% (escala GDS-15)</span><span>Check-in diário de humor e sintomas, com histórico da semana</span></div>
+                    <div class="evidence-row"><span>Barreiras visuais e cognitivas afastam idosos da tecnologia</span><span>Botões grandes, letra ajustável, alto contraste e uma ação por tela</span></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- BENEFÍCIOS -->
+        <section class="section" id="beneficios">
+            <div class="container">
+                <div class="section-head">
+                    <span class="eyebrow">Benefícios</span>
+                    <h2>Bom para quem é cuidado, para quem cuida e para a saúde</h2>
+                </div>
+                <div class="benefits">
+                    <article class="benefit green">
+                        <h3>Para o idoso</h3>
+                        <ul>
+                            <li>Mais autonomia: sabe o que fazer a cada hora do dia</li>
+                            <li>Menos esquecimentos de remédios, água e refeições</li>
+                            <li>SOS e registro de queda a um toque</li>
+                            <li>Tela simples, letras grandes e alto contraste</li>
+                        </ul>
+                    </article>
+                    <article class="benefit violet">
+                        <h3>Para o cuidador</h3>
+                        <ul>
+                            <li>Acompanha a rotina sem precisar perguntar tudo</li>
+                            <li>Alertas de queda, mal-estar e humor baixo</li>
+                            <li>Relatório semanal pronto para levar à consulta</li>
+                            <li>Funciona também no celular do cuidador, se o idoso não tiver um</li>
+                        </ul>
+                    </article>
+                    <article class="benefit blue">
+                        <h3>Para a saúde</h3>
+                        <ul>
+                            <li>Prevenção da perda de força e massa muscular</li>
+                            <li>Hidratação adequada mesmo sem sede</li>
+                            <li>Menos quedas com exercício regular e seguro</li>
+                            <li>Maior adesão aos tratamentos</li>
+                        </ul>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- PRIVACIDADE -->
+        <section class="section section-tint" id="privacidade">
+            <div class="container privacy">
+                <div class="privacy-text">
+                    <span class="eyebrow">Privacidade</span>
+                    <h2>Dados de saúde protegidos por padrão</h2>
+                    <p>Registros de alimentação, hidratação e mobilidade são dados sensíveis pela LGPD (Lei nº 13.709/2018). Por isso o CuidarApp foi feito para nunca enviá-los a lugar nenhum.</p>
+                    <ul class="checks">
+                        <li><strong>Nada vai para a internet.</strong> Tudo fica guardado no próprio celular.</li>
+                        <li><strong>Sem cadastro.</strong> Nada de e-mail, CPF ou login online.</li>
+                        <li><strong>Área do cuidador com senha</strong>, guardada de forma criptografada.</li>
+                        <li><strong>Controle total:</strong> apague todos os dados quando quiser.</li>
+                    </ul>
+                </div>
+                <figure class="phone privacy-phone"><img src="img/inicio.webp" alt="Tela inicial com os perfis do idoso e do cuidador" width="585" height="1266"></figure>
+            </div>
+        </section>
+
+        <!-- BAIXAR -->
+        <section class="section" id="baixar">
+            <div class="container">
+                <div class="download">
+                    <div class="download-text">
+                        <span class="eyebrow light">Download gratuito</span>
+                        <h2>Comece hoje, em menos de 2 minutos</h2>
+                        <ol class="steps">
+                            <li><span>1</span><p>Toque em <strong>Baixar para Android</strong> no celular, ou aponte a câmera para o QR code.</p></li>
+                            <li><span>2</span><p>Abra o arquivo baixado e permita a instalação de apps desta fonte, se o Android pedir.</p></li>
+                            <li><span>3</span><p>Entre como cuidador (senha inicial <strong>1234</strong>), troque a senha e cadastre a rotina.</p></li>
+                            <li><span>4</span><p>Entregue o celular ao idoso: ele entra com um toque no próprio perfil.</p></li>
+                        </ol>
+                        <div class="hero-actions">
+                            <a class="btn btn-white btn-lg" href="https://github.com/InBradleydesign/1-Download-and-Export/releases/latest/download/app-debug.apk" data-download>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                Baixar para Android
+                            </a>
+                        </div>
+                        <p class="download-meta">Versão 1.4 · APK de 3,5 MB · Android 8.0 ou superior</p>
+                    </div>
+                    <div class="qr">
+                        <img src="img/qr-download.svg" alt="QR code para baixar o CuidarApp" width="200" height="200">
+                        <span>Aponte a câmera do celular</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- DÚVIDAS -->
+        <section class="section section-tint" id="perguntas">
+            <div class="container narrow">
+                <div class="section-head">
+                    <span class="eyebrow">Dúvidas frequentes</span>
+                    <h2>Perguntas comuns</h2>
+                </div>
+                <div class="faq">
+                    <details>
+                        <summary>O CuidarApp é gratuito?</summary>
+                        <p>Sim. O download é gratuito, não há anúncios e não é preciso criar conta.</p>
+                    </details>
+                    <details>
+                        <summary>Precisa de internet?</summary>
+                        <p>Não. Depois de instalado, o aplicativo funciona totalmente offline. A internet só é usada para baixar o arquivo de instalação.</p>
+                    </details>
+                    <details>
+                        <summary>O idoso não tem celular. Dá para usar?</summary>
+                        <p>Sim. Nas configurações, escolha “Este celular é do cuidador”. O cuidador registra as tarefas pelo idoso e o app mostra isso na tela.</p>
+                    </details>
+                    <details>
+                        <summary>Funciona no iPhone?</summary>
+                        <p>Por enquanto o CuidarApp está disponível apenas para Android 8.0 ou superior.</p>
+                    </details>
+                    <details>
+                        <summary>Onde ficam os dados? Alguém mais tem acesso?</summary>
+                        <p>Somente no celular onde o app está instalado. Nada é enviado para servidores, e o cuidador pode apagar tudo nas configurações.</p>
+                    </details>
+                    <details>
+                        <summary>Esqueci a senha do cuidador. E agora?</summary>
+                        <p>A senha inicial é 1234. Se ela foi trocada e esquecida, limpe os dados do aplicativo nas configurações do Android; isso apaga os registros e volta à senha inicial.</p>
+                    </details>
+                    <details>
+                        <summary>O app substitui o médico ou o nutricionista?</summary>
+                        <p>Não. O CuidarApp organiza a rotina recomendada pelos profissionais de saúde e ajuda a acompanhá-la. Remédios, dieta e exercícios devem seguir a orientação deles.</p>
+                    </details>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-grid">
+            <div>
+                <a href="#inicio" class="brand brand-light">
+                    <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span>
+                    CuidarApp
+                </a>
+                <p>Cuidado integral do idoso, simples e sem internet.</p>
+                <p class="disclaimer">O CuidarApp não substitui consulta, diagnóstico ou tratamento por profissionais de saúde.</p>
+            </div>
+            <div class="sources">
+                <h4>Fontes da pesquisa</h4>
+                <p>IBGE, Censo Demográfico 2022 · Ministério da Saúde, VIGITEL 2023 · IBRANUTRI · Cruz-Jentoft et al., EWGSOP2 (2019) · Bauer et al., PROT-AGE (2013) · ESPEN, diretrizes de nutrição em geriatria (2019) · OMS, diretrizes de atividade física (2020) · Sherrington et al., revisão Cochrane sobre prevenção de quedas (2019) · Izquierdo et al. (2019) · Tieland et al. (2012) · Lei nº 13.709/2018 (LGPD).</p>
+            </div>
+        </div>
+        <div class="container footer-bottom">
+            <span>© 2026 CuidarApp</span>
+            <a href="#inicio">Voltar ao topo ↑</a>
+        </div>
+    </footer>
+
+    <a class="sticky-download" href="https://github.com/InBradleydesign/1-Download-and-Export/releases/latest/download/app-debug.apk" data-download>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Baixar o CuidarApp grátis
+    </a>
+
+    <script src="script.js"></script>
+</body>
+</html>
