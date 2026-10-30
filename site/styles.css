@@ -816,3 +816,20 @@ h3 { font-size: 19px; font-weight: 700; }
     .stat-value { font-size: 36px; }
     .footer-bottom { flex-direction: column; gap: 8px; }
 }
+
+/* ==================== 404 ==================== */
+.not-found {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 24px;
+    background: radial-gradient(900px 500px at 50% 0%, #F1ECFF 0%, rgba(241, 236, 255, 0) 70%);
+}
+
+.not-found .brand { margin-bottom: 48px; }
+.not-found h1 { font-size: clamp(32px, 5vw, 48px); font-weight: 800; margin-bottom: 12px; }
+.not-found p { color: var(--ink-2); margin-bottom: 28px; max-width: 460px; }
+.not-found .hero-actions { justify-content: center; }
