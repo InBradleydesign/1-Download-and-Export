@@ -16,6 +16,15 @@ import com.cuidarapp.data.dao.IdosoDao;
 import com.cuidarapp.data.dao.MedicamentoDao;
 import com.cuidarapp.data.dao.RegistroRefeicaoDao;
 import com.cuidarapp.data.dao.VisitaDao;
+import com.cuidarapp.health.data.HealthDao;
+import com.cuidarapp.health.data.HealthMigrations;
+import com.cuidarapp.health.data.ReminderDao;
+import com.cuidarapp.health.model.HealthMeasurement;
+import com.cuidarapp.health.model.HealthProfile;
+import com.cuidarapp.health.model.HealthReminder;
+import com.cuidarapp.health.model.MedicationIntake;
+import com.cuidarapp.health.model.ReminderEvent;
+import com.cuidarapp.health.model.SymptomRecord;
 import com.cuidarapp.model.AlertaEmergencia;
 import com.cuidarapp.model.CheckInDiario;
 import com.cuidarapp.model.Cuidador;
@@ -36,16 +45,22 @@ import com.cuidarapp.model.Visita;
         Exercicio.class,
         CheckInDiario.class,
         Visita.class,
-        AlertaEmergencia.class
+        AlertaEmergencia.class,
+        HealthProfile.class,
+        HealthMeasurement.class,
+        SymptomRecord.class,
+        MedicationIntake.class,
+        HealthReminder.class,
+        ReminderEvent.class
     },
-    version = 1,
-    exportSchema = false
+    version = 2,
+    exportSchema = true
 )
 @TypeConverters(Converters.class)
 public abstract class AppDatabase extends RoomDatabase {
     
     private static volatile AppDatabase INSTANCE;
-    private static final String DATABASE_NAME = "cuidar_app_database";
+    public static final String DATABASE_NAME = "cuidar_app_database";
     
     public abstract CuidadorDao cuidadorDao();
     public abstract IdosoDao idosoDao();
@@ -56,6 +71,8 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract CheckInDiarioDao checkInDiarioDao();
     public abstract VisitaDao visitaDao();
     public abstract AlertaEmergenciaDao alertaEmergenciaDao();
+    public abstract HealthDao healthDao();
+    public abstract ReminderDao reminderDao();
     
     public static AppDatabase getInstance(Context context) {
         if (INSTANCE == null) {
@@ -66,6 +83,7 @@ public abstract class AppDatabase extends RoomDatabase {
                         AppDatabase.class,
                         DATABASE_NAME
                     )
+                    .addMigrations(HealthMigrations.MIGRATION_1_2)
                     .allowMainThreadQueries()
                     .build();
                 }

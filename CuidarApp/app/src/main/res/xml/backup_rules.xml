@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Android 11 e anteriores: o banco com o Diário de Saúde fica fora do backup automático. -->
 <full-backup-content>
-    <include domain="database" path="." />
     <include domain="sharedpref" path="." />
 </full-backup-content>

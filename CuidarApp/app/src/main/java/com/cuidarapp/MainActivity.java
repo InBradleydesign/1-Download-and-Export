@@ -1,9 +1,14 @@
 package com.cuidarapp;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.ActivityNotFoundException;
+import android.content.ClipData;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
@@ -16,9 +21,14 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 import androidx.webkit.WebViewAssetLoader;
 
+import com.cuidarapp.health.HealthBridge;
+import com.cuidarapp.health.reminders.ReminderNotifier;
 import com.cuidarapp.ui.bridge.AppBridge;
+
+import java.io.File;
 
 public class MainActivity extends AppCompatActivity {
     
@@ -26,6 +36,8 @@ public class MainActivity extends AppCompatActivity {
     private AppBridge bridge;
     private WebViewAssetLoader assetLoader;
     private ValueCallback<Uri[]> pendingFileCallback;
+    private boolean pageLoaded;
+    private boolean openHealthWhenLoaded;
 
     private final ActivityResultLauncher<String> imagePicker =
         registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
@@ -34,6 +46,10 @@ public class MainActivity extends AppCompatActivity {
                 pendingFileCallback = null;
             }
         });
+
+    private final ActivityResultLauncher<String> notificationPermission =
+        registerForActivityResult(new ActivityResultContracts.RequestPermission(),
+            granted -> notifyWebHealthChanged());
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,8 +61,27 @@ public class MainActivity extends AppCompatActivity {
         setupAssetLoader();
         setupWebView();
         setupBackNavigation();
+
+        openHealthWhenLoaded = getIntent().getBooleanExtra(ReminderNotifier.EXTRA_OPEN_HEALTH, false);
+        ((CuidarApplication) getApplication()).setHealthChangedListener(this::notifyWebHealthChanged);
         
         webView.loadUrl("https://appassets.androidplatform.net/assets/web/index.html");
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        if (intent.getBooleanExtra(ReminderNotifier.EXTRA_OPEN_HEALTH, false)) {
+            openHealthWhenLoaded = true;
+            if (pageLoaded) openHealthTab();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Permissões podem ter mudado nas configurações do Android.
+        if (pageLoaded) notifyWebHealthChanged();
     }
     
     private void setupAssetLoader() {
@@ -72,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
         
         bridge = new AppBridge(this);
         webView.addJavascriptInterface(bridge, "AndroidBridge");
+        webView.addJavascriptInterface(new HealthBridge(this), "CuidarHealth");
         
         webView.setWebViewClient(new WebViewClient() {
             @Override
@@ -98,6 +134,12 @@ public class MainActivity extends AppCompatActivity {
                 }
                 
                 return !isAllowedOrigin(uri);
+            }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                pageLoaded = true;
+                if (openHealthWhenLoaded) openHealthTab();
             }
         });
 
@@ -145,6 +187,7 @@ public class MainActivity extends AppCompatActivity {
     
     @Override
     protected void onDestroy() {
+        ((CuidarApplication) getApplication()).setHealthChangedListener(null);
         if (webView != null) {
             webView.destroy();
         }
@@ -153,5 +196,66 @@ public class MainActivity extends AppCompatActivity {
     
     public void runJavaScript(String script) {
         runOnUiThread(() -> webView.evaluateJavascript(script, null));
+    }
+
+    // ==================== DIÁRIO DE SAÚDE ====================
+
+    private void openHealthTab() {
+        openHealthWhenLoaded = false;
+        runJavaScript("window.CuidarOpenHealth && window.CuidarOpenHealth()");
+    }
+
+    private void notifyWebHealthChanged() {
+        runJavaScript("window.CuidarHealthChanged && window.CuidarHealthChanged()");
+    }
+
+    public void requestNotificationPermission() {
+        runOnUiThread(() -> {
+            if (Build.VERSION.SDK_INT >= 33) {
+                notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS);
+            } else {
+                openNotificationSettings();
+            }
+        });
+    }
+
+    public void openNotificationSettings() {
+        Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+            .putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName());
+        startSettings(intent);
+    }
+
+    public void openExactAlarmSettings() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            startSettings(new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
+                Uri.parse("package:" + getPackageName())));
+        }
+    }
+
+    public void openBatterySettings() {
+        startSettings(new Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS));
+    }
+
+    private void startSettings(Intent intent) {
+        runOnUiThread(() -> {
+            try {
+                startActivity(intent);
+            } catch (ActivityNotFoundException e) {
+                startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                    Uri.parse("package:" + getPackageName())));
+            }
+        });
+    }
+
+    /** Compartilhamento só por ação do usuário, pela folha de compartilhamento do Android. */
+    public void shareFile(File file, String mimeType, String title) {
+        Uri uri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", file);
+        Intent send = new Intent(Intent.ACTION_SEND)
+            .setType(mimeType)
+            .putExtra(Intent.EXTRA_STREAM, uri)
+            .putExtra(Intent.EXTRA_SUBJECT, title)
+            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        send.setClipData(ClipData.newRawUri(title, uri));
+        runOnUiThread(() -> startActivity(Intent.createChooser(send, title)));
     }
 }
