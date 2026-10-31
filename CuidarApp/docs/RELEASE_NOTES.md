@@ -1,20 +1,22 @@
-## CuidarApp v1.4.0 — Revisão final
+## CuidarApp v1.5.0 — Diário de Saúde e atualizações sem perder dados
 
-### Correções
-- Menu inferior funcional nas telas do idoso e do cuidador
-- Configurações aparecem uma única vez (engrenagem no topo da tela do cuidador)
-- Troca de senha do cuidador e dos nomes funcionando
-- Idoso consegue registrar o humor e os sintomas na aba "Humor"
-- Botão voltar do Android volta para a aba inicial antes de sair
+### Novidades
+- **Diário de Saúde**: pressão, glicemia, peso, temperatura, saturação, frequência cardíaca, urina e sintomas, com histórico e gráficos (hoje, 7 dias, 30 dias ou período escolhido)
+- Lembretes de medições, remédios e consultas, com notificação no aparelho
+- Relatório em PDF gerado no próprio celular para levar à consulta (compartilhado só quando você escolher)
+- Diário com consentimento (LGPD) e exclusão a qualquer momento; os dados ficam somente no aparelho, sem envio automático para a internet
+- O app registra informações; não faz diagnóstico nem recomenda tratamentos
 
-### Menos redundância
-- Idoso: Hoje, Remédios, Exercícios, Comida e Humor apenas no menu inferior; SOS fixo no topo
-- Cuidador: Painel, Remédios, Exercícios, Dieta e Visitas no menu inferior
-- Dieta editada na própria aba, com salvamento automático
+### Atualizações sem perder dados
+A partir desta versão, o app é assinado com uma chave fixa. As próximas versões
+instalam **por cima** da versão atual e mantêm todos os dados salvos
+(remédios, registros, configurações e senha).
 
-### Visual
-- Cartões sem bordas, sombras leves e divisórias finas
+**Atenção, apenas uma vez:** as versões até 1.4 usavam uma assinatura de teste
+diferente. Para passar da 1.4 para a 1.5, desinstale a versão antiga antes de
+instalar esta. Os dados da versão antiga não são transferidos nesse passo.
+Depois disso, as atualizações futuras preservam os dados.
 
 ### Instalação
-Baixe o `app-debug.apk` abaixo no celular Android (8.0 ou superior) e permita a instalação de fontes desconhecidas.
+Baixe o `CuidarApp.apk` abaixo no celular Android (8.0 ou superior) e permita a instalação de fontes desconhecidas.
 Senha padrão do cuidador: **1234**.

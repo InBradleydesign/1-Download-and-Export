@@ -122,6 +122,29 @@ No build de debug, o app inicializa automaticamente com dados de demonstração:
    adb install app/build/outputs/apk/debug/app-debug.apk
    ```
 
+## Versão de distribuição e atualizações
+
+O Android só instala uma versão nova **por cima** da antiga (mantendo o banco Room
+e as configurações) quando o pacote (`com.cuidarapp`) e a **chave de assinatura**
+são os mesmos e o `versionCode` é maior. Por isso o APK distribuído é o `release`,
+sempre assinado com a mesma chave. As migrações do Room não apagam dados
+(não há `fallbackToDestructiveMigration`).
+
+A chave **nunca** vai para o repositório. O build lê a assinatura de variáveis de
+ambiente (`CUIDARAPP_KEYSTORE_FILE`, `CUIDARAPP_KEYSTORE_PASSWORD`,
+`CUIDARAPP_KEY_ALIAS`, `CUIDARAPP_KEY_PASSWORD`) ou de um `keystore.properties`
+local (ignorado pelo git), com `storeFile`, `storePassword`, `keyAlias` e `keyPassword`.
+Sem chave configurada, `assembleRelease` gera um APK sem assinatura.
+
+Publicar uma versão:
+1. Aumentar `versionCode` e `versionName` em `app/build.gradle` e atualizar `docs/RELEASE_NOTES.md`.
+2. Enviar uma tag `vX.Y.Z`. O workflow `release.yml` monta o keystore a partir dos
+   secrets `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`
+   e `ANDROID_KEY_PASSWORD`, roda os testes, confere a assinatura e publica `CuidarApp.apk`.
+
+Guarde uma cópia do keystore e das senhas em local seguro: se a chave for perdida,
+nenhuma versão futura poderá atualizar a instalada sem desinstalar.
+
 ## Testes
 
 ### Executar Testes Unitários
