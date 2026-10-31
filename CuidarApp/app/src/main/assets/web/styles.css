@@ -297,18 +297,17 @@ body.no-animations *::after {
 }
 
 .home-footnote {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--spacing-xs);
     margin-top: var(--spacing-xl);
     font-size: var(--font-xs);
     color: var(--color-text-muted);
+    text-align: center;
 }
 
 .home-footnote svg {
     width: 14px;
     height: 14px;
+    margin-right: 2px;
+    vertical-align: -2px;
 }
 
 /* ==================== CABEÇALHO ==================== */

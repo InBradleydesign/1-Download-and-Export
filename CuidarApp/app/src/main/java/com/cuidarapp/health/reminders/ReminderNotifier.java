@@ -34,7 +34,6 @@ public class ReminderNotifier {
     }
 
     public void ensureChannel() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
         NotificationManager manager = context.getSystemService(NotificationManager.class);
         if (manager.getNotificationChannel(CHANNEL_ID) != null) return;
         NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "Lembretes de saúde",
