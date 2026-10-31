@@ -10,14 +10,48 @@ android {
         applicationId "com.cuidarapp"
         minSdk 26
         targetSdk 34
-        versionCode 4
-        versionName "1.4.0"
+        versionCode 5
+        versionName "1.5.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += ["room.schemaLocation": "$projectDir/schemas".toString()]
+            }
+        }
+    }
+
+    // Atualizações por cima da versão instalada (mantendo os dados) exigem que
+    // todas as versões sejam assinadas com a MESMA chave. A chave nunca fica no
+    // repositório: vem de variáveis de ambiente (CI) ou de keystore.properties.
+    def keystoreProps = new Properties()
+    def keystorePropsFile = rootProject.file('keystore.properties')
+    if (keystorePropsFile.exists()) {
+        keystorePropsFile.withInputStream { keystoreProps.load(it) }
+    }
+    def signingValue = { String envName, String propName ->
+        System.getenv(envName) ?: keystoreProps.getProperty(propName)
+    }
+    def releaseStoreFile = signingValue('CUIDARAPP_KEYSTORE_FILE', 'storeFile')
+    def hasReleaseSigning = releaseStoreFile != null && rootProject.file(releaseStoreFile).exists()
+
+    signingConfigs {
+        if (hasReleaseSigning) {
+            release {
+                storeFile rootProject.file(releaseStoreFile)
+                storePassword signingValue('CUIDARAPP_KEYSTORE_PASSWORD', 'storePassword')
+                keyAlias signingValue('CUIDARAPP_KEY_ALIAS', 'keyAlias')
+                keyPassword signingValue('CUIDARAPP_KEY_PASSWORD', 'keyPassword')
+            }
+        }
     }
 
     buildTypes {
         release {
+            if (hasReleaseSigning) {
+                signingConfig signingConfigs.release
+            }
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }

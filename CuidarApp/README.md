@@ -21,6 +21,25 @@ Aplicativo Android para acompanhamento de idosos por cuidadores. Permite gerenci
 - Consultar calendário de visitas
 - Acionar botão de emergência
 
+### Diário de Saúde (v1.5)
+- **Perfil de saúde**: condições, medições acompanhadas, observações do profissional, orientações do profissional (valor + mensagem) e autorização para o cuidador anotar pelo idoso.
+- **Registros em casa**: pressão (sistólica, diastólica e pulso opcional), glicemia com o momento da medição, peso, temperatura, saturação, frequência cardíaca, volume de urina e sintomas (tipo, intensidade, horário, duração opcional e observação). Editar e excluir com confirmação; cada registro guarda quem anotou e quando, e quem editou.
+- **Remédios**: tomado, tomado com atraso (confirmado mais de 60 min depois do horário) ou não tomado. O app nunca marca uma dose sozinho e não sugere doses.
+- **Histórico e gráficos**: hoje, 7 dias, 30 dias ou período escolhido; pressão em duas séries; média/menor/maior só com 3 registros ou mais (glicemia separada por momento).
+- **Lembretes**: medições (horários e dias definidos pelo cuidador, sem horário padrão), remédios (no horário do cadastro) e consultas. Situação pendente, feito ou ignorado. Reagendados após reiniciar o celular, mudar hora/fuso ou atualizar o app.
+- **Relatório PDF**: identificação, período, quantidade de registros, tabelas com unidades, gráficos, sintomas, observações, histórico de remédios, data de emissão e aviso de que não substitui avaliação profissional. Pré-visualização e compartilhamento pelo Android; nada é enviado automaticamente.
+- **Sintomas de alerta** (dor no peito, falta de ar, confusão, fraqueza de um lado, desmaio): o app orienta procurar atendimento imediato.
+
+O app não diagnostica, não classifica valores como normais ou alterados e não tem limites clínicos próprios: as únicas orientações automáticas são as cadastradas a partir do profissional de saúde. As faixas de validação servem só para barrar erros de digitação.
+
+#### Privacidade e limitações
+- Os dados ficam no banco local (Room, versão 2) e ficam **fora do backup na nuvem e da transferência entre aparelhos** (`backup_rules.xml` / `data_extraction_rules.xml`).
+- O diário exige consentimento (LGPD) e pode ser apagado a qualquer momento (Cuidador › Saúde › Perfil).
+- **Não há sincronização entre aparelhos**: cada celular tem o seu diário. O cuidador acompanha pelo mesmo celular (área do cuidador, protegida por senha). Não existe backend.
+- O PDF é gerado no cache interno do app; só sai do aparelho se a pessoa tocar em Compartilhar.
+- Nenhum dado de saúde é escrito no log.
+- Em Android 12+, sem a permissão de alarme exato o Android pode atrasar o aviso alguns minutos; alguns fabricantes bloqueiam avisos por economia de bateria (o app mostra o estado e leva às configurações).
+
 ## Arquitetura
 
 - **minSdk**: 26 (Android 8.0)
@@ -38,9 +57,19 @@ com.cuidarapp/
 │   └── dao/        # DAOs do Room
 ├── repository/     # Camada de repositório
 ├── service/        # Lógica de negócio
+├── health/         # Diário de Saúde
+│   ├── model/      # Entidades Room (medições, sintomas, doses, lembretes, perfil)
+│   ├── data/       # DAOs e migração 1 -> 2
+│   ├── domain/     # Validação, estatísticas, orientações, cálculo de lembretes (Java puro)
+│   ├── reminders/  # AlarmManager, notificações e receptores
+│   ├── report/     # Montagem e desenho do PDF
+│   ├── HealthRepository.java  # Consentimento, permissões e auditoria
+│   └── HealthBridge.java      # window.CuidarHealth
 └── ui/
     └── bridge/     # Ponte JavaScript
 ```
+
+A interface do diário está em `assets/web/health.js`, integrada ao `app.js`.
 
 ## Credenciais de Demonstração (Build Debug)
 
@@ -93,6 +122,29 @@ No build de debug, o app inicializa automaticamente com dados de demonstração:
    adb install app/build/outputs/apk/debug/app-debug.apk
    ```
 
+## Versão de distribuição e atualizações
+
+O Android só instala uma versão nova **por cima** da antiga (mantendo o banco Room
+e as configurações) quando o pacote (`com.cuidarapp`) e a **chave de assinatura**
+são os mesmos e o `versionCode` é maior. Por isso o APK distribuído é o `release`,
+sempre assinado com a mesma chave. As migrações do Room não apagam dados
+(não há `fallbackToDestructiveMigration`).
+
+A chave **nunca** vai para o repositório. O build lê a assinatura de variáveis de
+ambiente (`CUIDARAPP_KEYSTORE_FILE`, `CUIDARAPP_KEYSTORE_PASSWORD`,
+`CUIDARAPP_KEY_ALIAS`, `CUIDARAPP_KEY_PASSWORD`) ou de um `keystore.properties`
+local (ignorado pelo git), com `storeFile`, `storePassword`, `keyAlias` e `keyPassword`.
+Sem chave configurada, `assembleRelease` gera um APK sem assinatura.
+
+Publicar uma versão:
+1. Aumentar `versionCode` e `versionName` em `app/build.gradle` e atualizar `docs/RELEASE_NOTES.md`.
+2. Enviar uma tag `vX.Y.Z`. O workflow `release.yml` monta o keystore a partir dos
+   secrets `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`
+   e `ANDROID_KEY_PASSWORD`, roda os testes, confere a assinatura e publica `CuidarApp.apk`.
+
+Guarde uma cópia do keystore e das senhas em local seguro: se a chave for perdida,
+nenhuma versão futura poderá atualizar a instalada sem desinstalar.
+
 ## Testes
 
 ### Executar Testes Unitários
@@ -108,6 +160,13 @@ No build de debug, o app inicializa automaticamente com dados de demonstração:
 - Confirmação de medicamento
 - Conclusão de exercício
 - Cálculo de progresso
+- Diário de Saúde: validação das leituras, cálculo dos lembretes (fusos e horário de verão), estatísticas, orientações do profissional, situação das doses, montagem do relatório, repositório com Room em memória (salvar, editar, excluir, histórico, consentimento, permissão do cuidador, isolamento por paciente, exclusão LGPD), migração 1 -> 2 a partir do esquema exportado, agendamento de alarmes, notificações e respostas pela notificação (Robolectric)
+
+### Teste instrumentado (aparelho ou emulador)
+```bash
+./gradlew connectedDebugAndroidTest
+```
+Gera o PDF real com `PdfDocument`/`PdfRenderer` e confere a pré-visualização e o compartilhamento via `FileProvider`.
 
 ## Acessibilidade
 

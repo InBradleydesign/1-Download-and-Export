@@ -3,8 +3,14 @@ package com.cuidarapp;
 import android.app.Application;
 
 import com.cuidarapp.data.AppDatabase;
+import com.cuidarapp.health.HealthRepository;
+import com.cuidarapp.health.reminders.ReminderNotifier;
+import com.cuidarapp.health.reminders.ReminderScheduler;
 import com.cuidarapp.repository.*;
 import com.cuidarapp.service.*;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class CuidarApplication extends Application {
     
@@ -32,6 +38,12 @@ public class CuidarApplication extends Application {
     private CheckInService checkInService;
     private EmergenciaService emergenciaService;
     private ProgressoService progressoService;
+
+    private HealthRepository healthRepository;
+    private ReminderScheduler reminderScheduler;
+    private ReminderNotifier reminderNotifier;
+    private final ExecutorService healthExecutor = Executors.newSingleThreadExecutor();
+    private volatile Runnable healthChangedListener;
     
     @Override
     public void onCreate() {
@@ -41,10 +53,46 @@ public class CuidarApplication extends Application {
         initDatabase();
         initRepositories();
         initServices();
+        initHealthDiary();
         
         if (BuildConfig.DEBUG) {
             initDemoData();
         }
+    }
+
+    private void initHealthDiary() {
+        healthRepository = new HealthRepository(database);
+        reminderScheduler = new ReminderScheduler(this);
+        reminderNotifier = new ReminderNotifier(this);
+        reminderNotifier.ensureChannel();
+        // Alarmes somem quando o app é forçado a parar; recalcula a cada abertura.
+        healthExecutor.execute(() -> reminderScheduler.rescheduleAll(healthRepository));
+    }
+
+    public HealthRepository getHealthRepository() {
+        return healthRepository;
+    }
+
+    public ReminderScheduler getReminderScheduler() {
+        return reminderScheduler;
+    }
+
+    public ReminderNotifier getReminderNotifier() {
+        return reminderNotifier;
+    }
+
+    public ExecutorService getHealthExecutor() {
+        return healthExecutor;
+    }
+
+    public void setHealthChangedListener(Runnable listener) {
+        healthChangedListener = listener;
+    }
+
+    /** Avisa a tela aberta que um lembrete disparou ou foi respondido pela notificação. */
+    public void notifyHealthChanged() {
+        Runnable listener = healthChangedListener;
+        if (listener != null) listener.run();
     }
     
     private void initDatabase() {

@@ -23,4 +23,11 @@ npx vercel --prod # produção
 - Cabeçalhos de segurança e cache das imagens.
 
 ## Atualizar
-O link de download aponta para `releases/latest`, então não precisa mudar o site a cada nova versão do app. Basta publicar a release com uma tag `v*`.
+O link de download (botões, QR code, `/baixar` e `/download`) aponta para
+`releases/latest/download/CuidarApp.apk`, então não precisa mudar o site a cada
+nova versão do app. Basta publicar a release com uma tag `v*`: o workflow
+`release.yml` gera o `CuidarApp.apk` assinado com a chave fixa, o que permite
+instalar por cima da versão anterior sem perder os dados.
+
+A cada versão nova, acrescente um cartão na seção **Novidades** (`#novidades`
+em `index.html`) e ajuste o número da versão no bloco de download.

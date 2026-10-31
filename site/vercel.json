@@ -5,12 +5,12 @@
   "redirects": [
     {
       "source": "/baixar",
-      "destination": "https://github.com/InBradleydesign/1-Download-and-Export/releases/latest/download/app-debug.apk",
+      "destination": "https://github.com/InBradleydesign/1-Download-and-Export/releases/latest/download/CuidarApp.apk",
       "permanent": false
     },
     {
       "source": "/download",
-      "destination": "https://github.com/InBradleydesign/1-Download-and-Export/releases/latest/download/app-debug.apk",
+      "destination": "https://github.com/InBradleydesign/1-Download-and-Export/releases/latest/download/CuidarApp.apk",
       "permanent": false
     }
   ],

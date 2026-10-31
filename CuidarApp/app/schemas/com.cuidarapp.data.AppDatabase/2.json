@@ -1,0 +1,1464 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 2,
+    "identityHash": "5e9e78d636d9867974ecd5a55f7fcc39",
+    "entities": [
+      {
+        "tableName": "cuidadores",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `nome` TEXT, `email` TEXT, `senha_hash` TEXT, `senha_salt` TEXT, `tamanho_fonte` REAL NOT NULL, `tipo_perfil` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nome",
+            "columnName": "nome",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "email",
+            "columnName": "email",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "senhaHash",
+            "columnName": "senha_hash",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "senhaSalt",
+            "columnName": "senha_salt",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "tamanhoFonte",
+            "columnName": "tamanho_fonte",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tipoPerfil",
+            "columnName": "tipo_perfil",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "idosos",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cuidador_id` INTEGER NOT NULL, `telefone_emergencia` TEXT, `observacoes` TEXT, `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `nome` TEXT, `email` TEXT, `senha_hash` TEXT, `senha_salt` TEXT, `tamanho_fonte` REAL NOT NULL, `tipo_perfil` TEXT, FOREIGN KEY(`cuidador_id`) REFERENCES `cuidadores`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "cuidadorId",
+            "columnName": "cuidador_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "telefoneEmergencia",
+            "columnName": "telefone_emergencia",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "observacoes",
+            "columnName": "observacoes",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nome",
+            "columnName": "nome",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "email",
+            "columnName": "email",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "senhaHash",
+            "columnName": "senha_hash",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "senhaSalt",
+            "columnName": "senha_salt",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "tamanhoFonte",
+            "columnName": "tamanho_fonte",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tipoPerfil",
+            "columnName": "tipo_perfil",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_idosos_cuidador_id",
+            "unique": false,
+            "columnNames": [
+              "cuidador_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_idosos_cuidador_id` ON `${TABLE_NAME}` (`cuidador_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "cuidadores",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "cuidador_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "dietas_semanais",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `idoso_id` INTEGER NOT NULL, `dia_semana` INTEGER NOT NULL, `cafe_manha` TEXT, `lanche_manha` TEXT, `almoco` TEXT, `lanche_tarde` TEXT, `jantar` TEXT, `ceia` TEXT, `observacoes` TEXT, `data_criacao` TEXT, FOREIGN KEY(`idoso_id`) REFERENCES `idosos`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idosoId",
+            "columnName": "idoso_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "diaSemana",
+            "columnName": "dia_semana",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cafeManha",
+            "columnName": "cafe_manha",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "lancheManha",
+            "columnName": "lanche_manha",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "almoco",
+            "columnName": "almoco",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "lancheTarde",
+            "columnName": "lanche_tarde",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "jantar",
+            "columnName": "jantar",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "ceia",
+            "columnName": "ceia",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "observacoes",
+            "columnName": "observacoes",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "dataCriacao",
+            "columnName": "data_criacao",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_dietas_semanais_idoso_id",
+            "unique": false,
+            "columnNames": [
+              "idoso_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_dietas_semanais_idoso_id` ON `${TABLE_NAME}` (`idoso_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "idosos",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "idoso_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "registros_refeicao",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `idoso_id` INTEGER NOT NULL, `data` TEXT, `hora` TEXT, `tipo_refeicao` TEXT, `descricao` TEXT, `observacoes` TEXT, FOREIGN KEY(`idoso_id`) REFERENCES `idosos`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idosoId",
+            "columnName": "idoso_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "data",
+            "columnName": "data",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hora",
+            "columnName": "hora",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "tipoRefeicao",
+            "columnName": "tipo_refeicao",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "descricao",
+            "columnName": "descricao",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "observacoes",
+            "columnName": "observacoes",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_registros_refeicao_idoso_id",
+            "unique": false,
+            "columnNames": [
+              "idoso_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_registros_refeicao_idoso_id` ON `${TABLE_NAME}` (`idoso_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "idosos",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "idoso_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "medicamentos",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `idoso_id` INTEGER NOT NULL, `nome` TEXT, `dosagem` TEXT, `horario` TEXT, `frequencia` TEXT, `dias_semana` TEXT, `instrucoes` TEXT, `data_inicio` TEXT, `data_fim` TEXT, `ativo` INTEGER NOT NULL, FOREIGN KEY(`idoso_id`) REFERENCES `idosos`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idosoId",
+            "columnName": "idoso_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nome",
+            "columnName": "nome",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "dosagem",
+            "columnName": "dosagem",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "horario",
+            "columnName": "horario",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "frequencia",
+            "columnName": "frequencia",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "diasSemana",
+            "columnName": "dias_semana",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "instrucoes",
+            "columnName": "instrucoes",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "dataInicio",
+            "columnName": "data_inicio",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "dataFim",
+            "columnName": "data_fim",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "ativo",
+            "columnName": "ativo",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_medicamentos_idoso_id",
+            "unique": false,
+            "columnNames": [
+              "idoso_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_medicamentos_idoso_id` ON `${TABLE_NAME}` (`idoso_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "idosos",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "idoso_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "exercicios",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `idoso_id` INTEGER NOT NULL, `nome` TEXT, `descricao` TEXT, `duracao_minutos` INTEGER NOT NULL, `frequencia_semanal` INTEGER NOT NULL, `dias_semana` TEXT, `instrucoes` TEXT, `data_criacao` TEXT, `ativo` INTEGER NOT NULL, FOREIGN KEY(`idoso_id`) REFERENCES `idosos`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idosoId",
+            "columnName": "idoso_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nome",
+            "columnName": "nome",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "descricao",
+            "columnName": "descricao",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "duracaoMinutos",
+            "columnName": "duracao_minutos",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "frequenciaSemanal",
+            "columnName": "frequencia_semanal",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "diasSemana",
+            "columnName": "dias_semana",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "instrucoes",
+            "columnName": "instrucoes",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "dataCriacao",
+            "columnName": "data_criacao",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "ativo",
+            "columnName": "ativo",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_exercicios_idoso_id",
+            "unique": false,
+            "columnNames": [
+              "idoso_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_exercicios_idoso_id` ON `${TABLE_NAME}` (`idoso_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "idosos",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "idoso_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "checkins_diarios",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `idoso_id` INTEGER NOT NULL, `data` TEXT, `data_hora` TEXT, `tipo` TEXT, `referencia_id` INTEGER NOT NULL, `estado_humor` TEXT, `estado_fisico` TEXT, `observacoes` TEXT, `concluido` INTEGER NOT NULL, FOREIGN KEY(`idoso_id`) REFERENCES `idosos`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idosoId",
+            "columnName": "idoso_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "data",
+            "columnName": "data",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "dataHora",
+            "columnName": "data_hora",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "tipo",
+            "columnName": "tipo",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "referenciaId",
+            "columnName": "referencia_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "estadoHumor",
+            "columnName": "estado_humor",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "estadoFisico",
+            "columnName": "estado_fisico",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "observacoes",
+            "columnName": "observacoes",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "concluido",
+            "columnName": "concluido",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_checkins_diarios_idoso_id",
+            "unique": false,
+            "columnNames": [
+              "idoso_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_checkins_diarios_idoso_id` ON `${TABLE_NAME}` (`idoso_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "idosos",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "idoso_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "visitas",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `idoso_id` INTEGER NOT NULL, `cuidador_id` INTEGER NOT NULL, `data` TEXT, `hora_inicio` TEXT, `hora_fim` TEXT, `descricao` TEXT, `status` TEXT, `observacoes` TEXT, FOREIGN KEY(`idoso_id`) REFERENCES `idosos`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`cuidador_id`) REFERENCES `cuidadores`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idosoId",
+            "columnName": "idoso_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cuidadorId",
+            "columnName": "cuidador_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "data",
+            "columnName": "data",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "horaInicio",
+            "columnName": "hora_inicio",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "horaFim",
+            "columnName": "hora_fim",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "descricao",
+            "columnName": "descricao",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "observacoes",
+            "columnName": "observacoes",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_visitas_idoso_id",
+            "unique": false,
+            "columnNames": [
+              "idoso_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_visitas_idoso_id` ON `${TABLE_NAME}` (`idoso_id`)"
+          },
+          {
+            "name": "index_visitas_cuidador_id",
+            "unique": false,
+            "columnNames": [
+              "cuidador_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_visitas_cuidador_id` ON `${TABLE_NAME}` (`cuidador_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "idosos",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "idoso_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "cuidadores",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "cuidador_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "alertas_emergencia",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `idoso_id` INTEGER NOT NULL, `data_hora` TEXT, `status` TEXT, `descricao` TEXT, `telefone_discado` TEXT, `observacoes` TEXT, FOREIGN KEY(`idoso_id`) REFERENCES `idosos`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idosoId",
+            "columnName": "idoso_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataHora",
+            "columnName": "data_hora",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "descricao",
+            "columnName": "descricao",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "telefoneDiscado",
+            "columnName": "telefone_discado",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "observacoes",
+            "columnName": "observacoes",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_alertas_emergencia_idoso_id",
+            "unique": false,
+            "columnNames": [
+              "idoso_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_alertas_emergencia_idoso_id` ON `${TABLE_NAME}` (`idoso_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "idosos",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "idoso_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "health_profiles",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`patient_id` INTEGER NOT NULL, `conditions_json` TEXT, `conditions_other` TEXT, `indicators_json` TEXT, `doctor_notes` TEXT, `caregiver_may_record` INTEGER NOT NULL, `alert_rules_json` TEXT, `consent_at` INTEGER, `consent_by` TEXT, `updated_at` INTEGER, `updated_by` TEXT, PRIMARY KEY(`patient_id`))",
+        "fields": [
+          {
+            "fieldPath": "patientId",
+            "columnName": "patient_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "conditionsJson",
+            "columnName": "conditions_json",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "conditionsOther",
+            "columnName": "conditions_other",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "indicatorsJson",
+            "columnName": "indicators_json",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "doctorNotes",
+            "columnName": "doctor_notes",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "caregiverMayRecord",
+            "columnName": "caregiver_may_record",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "alertRulesJson",
+            "columnName": "alert_rules_json",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "consentAt",
+            "columnName": "consent_at",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "consentBy",
+            "columnName": "consent_by",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updated_at",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "updatedBy",
+            "columnName": "updated_by",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "patient_id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "health_measurements",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `patient_id` INTEGER NOT NULL, `type` TEXT NOT NULL, `value1` REAL NOT NULL, `value2` REAL, `value3` REAL, `context` TEXT, `measured_at` INTEGER NOT NULL, `note` TEXT, `created_at` INTEGER NOT NULL, `created_by_role` TEXT, `created_by_name` TEXT, `updated_at` INTEGER, `updated_by_role` TEXT, `updated_by_name` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "patientId",
+            "columnName": "patient_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "value1",
+            "columnName": "value1",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "value2",
+            "columnName": "value2",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "value3",
+            "columnName": "value3",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "context",
+            "columnName": "context",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "measuredAt",
+            "columnName": "measured_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "note",
+            "columnName": "note",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "created_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdByRole",
+            "columnName": "created_by_role",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "createdByName",
+            "columnName": "created_by_name",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updated_at",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "updatedByRole",
+            "columnName": "updated_by_role",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "updatedByName",
+            "columnName": "updated_by_name",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_health_measurements_patient_id_type_measured_at",
+            "unique": false,
+            "columnNames": [
+              "patient_id",
+              "type",
+              "measured_at"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_health_measurements_patient_id_type_measured_at` ON `${TABLE_NAME}` (`patient_id`, `type`, `measured_at`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "health_symptoms",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `patient_id` INTEGER NOT NULL, `symptom` TEXT NOT NULL, `custom_label` TEXT, `intensity` INTEGER NOT NULL, `duration_minutes` INTEGER, `occurred_at` INTEGER NOT NULL, `note` TEXT, `created_at` INTEGER NOT NULL, `created_by_role` TEXT, `created_by_name` TEXT, `updated_at` INTEGER, `updated_by_role` TEXT, `updated_by_name` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "patientId",
+            "columnName": "patient_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "symptom",
+            "columnName": "symptom",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "customLabel",
+            "columnName": "custom_label",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "intensity",
+            "columnName": "intensity",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "durationMinutes",
+            "columnName": "duration_minutes",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "occurredAt",
+            "columnName": "occurred_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "note",
+            "columnName": "note",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "created_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdByRole",
+            "columnName": "created_by_role",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "createdByName",
+            "columnName": "created_by_name",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updated_at",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "updatedByRole",
+            "columnName": "updated_by_role",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "updatedByName",
+            "columnName": "updated_by_name",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_health_symptoms_patient_id_occurred_at",
+            "unique": false,
+            "columnNames": [
+              "patient_id",
+              "occurred_at"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_health_symptoms_patient_id_occurred_at` ON `${TABLE_NAME}` (`patient_id`, `occurred_at`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "medication_intakes",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `patient_id` INTEGER NOT NULL, `med_ref` TEXT NOT NULL, `med_name` TEXT, `dosage` TEXT, `scheduled_date` TEXT NOT NULL, `scheduled_time` TEXT, `status` TEXT NOT NULL, `taken_at` INTEGER, `created_at` INTEGER NOT NULL, `created_by_role` TEXT, `created_by_name` TEXT, `updated_at` INTEGER, `updated_by_role` TEXT, `updated_by_name` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "patientId",
+            "columnName": "patient_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "medRef",
+            "columnName": "med_ref",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "medName",
+            "columnName": "med_name",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "dosage",
+            "columnName": "dosage",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "scheduledDate",
+            "columnName": "scheduled_date",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "scheduledTime",
+            "columnName": "scheduled_time",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "takenAt",
+            "columnName": "taken_at",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "created_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdByRole",
+            "columnName": "created_by_role",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "createdByName",
+            "columnName": "created_by_name",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updated_at",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "updatedByRole",
+            "columnName": "updated_by_role",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "updatedByName",
+            "columnName": "updated_by_name",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_medication_intakes_patient_id_med_ref_scheduled_date",
+            "unique": true,
+            "columnNames": [
+              "patient_id",
+              "med_ref",
+              "scheduled_date"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_medication_intakes_patient_id_med_ref_scheduled_date` ON `${TABLE_NAME}` (`patient_id`, `med_ref`, `scheduled_date`)"
+          },
+          {
+            "name": "index_medication_intakes_patient_id_scheduled_date",
+            "unique": false,
+            "columnNames": [
+              "patient_id",
+              "scheduled_date"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_medication_intakes_patient_id_scheduled_date` ON `${TABLE_NAME}` (`patient_id`, `scheduled_date`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "health_reminders",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `patient_id` INTEGER NOT NULL, `kind` TEXT NOT NULL, `ref_id` TEXT, `title` TEXT NOT NULL, `detail` TEXT, `times` TEXT, `days_mask` INTEGER NOT NULL, `once_at` INTEGER, `enabled` INTEGER NOT NULL, `created_at` INTEGER NOT NULL, `created_by_name` TEXT, `updated_at` INTEGER)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "patientId",
+            "columnName": "patient_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "kind",
+            "columnName": "kind",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "refId",
+            "columnName": "ref_id",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "detail",
+            "columnName": "detail",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "times",
+            "columnName": "times",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "daysMask",
+            "columnName": "days_mask",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "onceAt",
+            "columnName": "once_at",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "enabled",
+            "columnName": "enabled",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "created_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdByName",
+            "columnName": "created_by_name",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updated_at",
+            "affinity": "INTEGER",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_health_reminders_patient_id_kind_ref_id",
+            "unique": true,
+            "columnNames": [
+              "patient_id",
+              "kind",
+              "ref_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_health_reminders_patient_id_kind_ref_id` ON `${TABLE_NAME}` (`patient_id`, `kind`, `ref_id`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "reminder_events",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `patient_id` INTEGER NOT NULL, `reminder_id` INTEGER NOT NULL, `kind` TEXT NOT NULL, `ref_id` TEXT, `title` TEXT NOT NULL, `detail` TEXT, `scheduled_at` INTEGER NOT NULL, `status` TEXT NOT NULL, `resolved_at` INTEGER, `resolved_by` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "patientId",
+            "columnName": "patient_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reminderId",
+            "columnName": "reminder_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "kind",
+            "columnName": "kind",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "refId",
+            "columnName": "ref_id",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "detail",
+            "columnName": "detail",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "scheduledAt",
+            "columnName": "scheduled_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "resolvedAt",
+            "columnName": "resolved_at",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "resolvedBy",
+            "columnName": "resolved_by",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_reminder_events_reminder_id_scheduled_at",
+            "unique": true,
+            "columnNames": [
+              "reminder_id",
+              "scheduled_at"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_reminder_events_reminder_id_scheduled_at` ON `${TABLE_NAME}` (`reminder_id`, `scheduled_at`)"
+          },
+          {
+            "name": "index_reminder_events_patient_id_scheduled_at",
+            "unique": false,
+            "columnNames": [
+              "patient_id",
+              "scheduled_at"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_reminder_events_patient_id_scheduled_at` ON `${TABLE_NAME}` (`patient_id`, `scheduled_at`)"
+          }
+        ],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '5e9e78d636d9867974ecd5a55f7fcc39')"
+    ]
+  }
+}

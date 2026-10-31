@@ -31,8 +31,38 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v4
 
-      - name: Build Debug APK
-        run: chmod +x ./gradlew && ./gradlew assembleDebug test
+      # Every release must be signed with the same key, otherwise Android
+      # refuses to install it over the previous version (and the user would
+      # have to uninstall, losing the saved data).
+      - name: Restore release keystore
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          for name in ANDROID_KEYSTORE_BASE64 ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Secret $name is missing. Add it in Settings > Secrets and variables > Actions."
+              exit 1
+            fi
+          done
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/release.jks"
+          {
+            echo "CUIDARAPP_KEYSTORE_FILE=$RUNNER_TEMP/release.jks"
+            echo "CUIDARAPP_KEYSTORE_PASSWORD=$ANDROID_KEYSTORE_PASSWORD"
+            echo "CUIDARAPP_KEY_ALIAS=$ANDROID_KEY_ALIAS"
+            echo "CUIDARAPP_KEY_PASSWORD=$ANDROID_KEY_PASSWORD"
+          } >> "$GITHUB_ENV"
+
+      - name: Build signed release APK and run tests
+        run: chmod +x ./gradlew && ./gradlew assembleRelease test
+
+      - name: Verify signature
+        run: |
+          APKSIGNER=$(ls "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -1)
+          "$APKSIGNER" verify --print-certs app/build/outputs/apk/release/app-release.apk
+          cp app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/CuidarApp.apk
 
       - name: Publish release
         uses: softprops/action-gh-release@v2
@@ -41,6 +71,6 @@ jobs:
           body_path: CuidarApp/docs/RELEASE_NOTES.md
           make_latest: true
           files: |
-            CuidarApp/app/build/outputs/apk/debug/app-debug.apk
+            CuidarApp/app/build/outputs/apk/release/CuidarApp.apk
             CuidarApp/docs/apresentacao/CuidarApp_Apresentacao.pdf
             CuidarApp/docs/apresentacao/CuidarApp_Apresentacao.pptx
