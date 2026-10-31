@@ -39,7 +39,9 @@ const App = {
     history: [],
     currentCategory: 'all',
     caregiverTab: 'panel',
-    dietDay: null
+    dietDay: null,
+    // Quem está usando agora: 'patient' (tela do idoso) ou 'caregiver' (após a senha ou no celular do cuidador)
+    actingRole: null
 };
 
 // ==================== CONSTANTES DE DOMÍNIO ====================
@@ -398,8 +400,7 @@ function goBack() {
     if (!current || current.id === 'screen-home') return false;
 
     if (current.id === 'screen-elderly' || current.id === 'screen-caregiver') {
-        App.history = [];
-        showScreen('screen-home', { isBack: true });
+        goHome();
         return true;
     }
 
@@ -410,6 +411,7 @@ function goBack() {
 
 function goHome() {
     App.history = [];
+    App.actingRole = null;
     showScreen('screen-home', { isBack: true });
 }
 
@@ -417,6 +419,7 @@ function renderScreen(screenId) {
     if (screenId === 'screen-elderly') renderElderly();
     else if (screenId === 'screen-caregiver') renderCaregiver();
     else if (screenId === 'screen-settings' || screenId === 'screen-emergency') updateDisplayNames();
+    else if (typeof renderHealthScreen === 'function') renderHealthScreen(screenId);
 }
 
 function refreshCurrentScreen() {
@@ -425,10 +428,7 @@ function refreshCurrentScreen() {
 }
 
 function initNavigation() {
-    document.getElementById('btn-enter-elderly').addEventListener('click', () => {
-        App.currentCategory = 'all';
-        showScreen('screen-elderly');
-    });
+    document.getElementById('btn-enter-elderly').addEventListener('click', () => enterElderly('all'));
     document.getElementById('btn-enter-caregiver').addEventListener('click', showPasswordModal);
     document.getElementById('btn-caregiver-settings').addEventListener('click', () => showScreen('screen-settings'));
     document.getElementById('btn-emergency').addEventListener('click', () => showScreen('screen-emergency'));
@@ -442,6 +442,12 @@ function initNavigation() {
     document.querySelectorAll('#caregiver-nav [data-tab]').forEach(item => {
         item.addEventListener('click', () => setCaregiverTab(item.dataset.tab));
     });
+}
+
+function enterElderly(category) {
+    App.currentCategory = category;
+    App.actingRole = App.settings.deviceOwner === 'caregiver' ? 'caregiver' : 'patient';
+    showScreen('screen-elderly');
 }
 
 function markActiveNav(navId, attr, value) {
@@ -534,6 +540,7 @@ async function validatePassword() {
         input.blur();
         closeModal('password-modal');
         App.caregiverTab = 'panel';
+        App.actingRole = 'caregiver';
         showScreen('screen-caregiver');
     } else {
         input.classList.add('error');
@@ -778,6 +785,8 @@ function renderElderlyFood() {
 function renderElderlyHealth() {
     const log = getLog();
     const days = lastDays(7);
+    // Com o Diário de Saúde ativo, sintomas são anotados com intensidade e horário pelo diário.
+    const diaryActive = healthHasConsent();
     return `
         <div class="card">
             <div class="mood-question">Como você está se sentindo?</div>
@@ -789,11 +798,12 @@ function renderElderlyHealth() {
                     </button>`).join('')}
             </div>
         </div>
-        ${section('Está sentindo algo?', `
+        ${diaryActive ? '' : section('Está sentindo algo?', `
             <div class="chips">
                 ${SYMPTOMS.map(s => `<button class="chip ${log.symptoms.includes(s) ? 'selected' : ''}" data-symptom="${s}" aria-pressed="${log.symptoms.includes(s)}">${s}</button>`).join('')}
-            </div>
-            <button class="danger-btn" data-fall>${ICONS.alert}Tive uma queda</button>`)}
+            </div>`)}
+        ${renderElderlyHealthDiary()}
+        <button class="danger-btn" data-fall>${ICONS.alert}Tive uma queda</button>
         ${section('Minha semana', `
             <div class="card mood-week">
                 ${days.map(d => {
@@ -806,18 +816,28 @@ function renderElderlyHealth() {
 }
 
 function medicationTasks(date) {
+    const isToday = dateKey(date) === dateKey();
+    const intakes = isToday ? syncIntakesToLog() : {};
+    const diaryActive = isToday && healthHasConsent();
     const log = getLog(dateKey(date));
-    return App.data.medications.filter(m => isMedicationScheduled(m, date)).map(m => ({
-        id: m.id,
-        type: 'medication',
-        kind: 'medication',
-        title: m.name,
-        subtitle: m.dosage,
-        detail: m.instructions,
-        time: m.time,
-        done: log.meds.includes(m.id),
-        icon: ICONS.pill
-    }));
+    return App.data.medications.filter(m => isMedicationScheduled(m, date)).map(m => {
+        const done = log.meds.includes(m.id);
+        const intake = intakes[String(m.id)];
+        const note = medicationIntakeNote(m, intakes);
+        const canMarkMissed = diaryActive && !done && !(intake && intake.status === 'missed');
+        return {
+            id: m.id,
+            type: 'medication',
+            kind: 'medication',
+            title: m.name,
+            subtitle: m.dosage,
+            detail: m.instructions,
+            time: m.time,
+            done,
+            icon: ICONS.pill,
+            extra: `${note ? `<div class="record-meta">${escapeHtml(note)}</div>` : ''}${canMarkMissed ? `<button class="link-btn" data-h-missed="${m.id}">Não tomei</button>` : ''}`
+        };
+    });
 }
 
 function exerciseTasks(date) {
@@ -862,6 +882,7 @@ function taskCard(task) {
                     ${task.time ? `<span class="task-time">${ICONS.clock}${task.time}</span>` : ''}
                     ${task.tag ? `<span class="type-tag type-${task.tag}">${EXERCISE_TYPES[task.tag]}</span>` : ''}
                 </div>` : ''}
+                ${task.extra || ''}
             </div>
             <button class="task-check ${task.done ? 'checked' : ''}" data-task-type="${task.type}" data-task-id="${task.id}"
                 aria-label="${task.done ? 'Desmarcar' : 'Marcar como feito'}: ${escapeHtml(task.title)}" aria-pressed="${task.done}">
@@ -955,6 +976,7 @@ function bindElderlyEvents(root) {
         btn.addEventListener('click', () => toggleSymptom(btn.dataset.symptom));
     });
     root.querySelectorAll('[data-fall]').forEach(btn => btn.addEventListener('click', registerFall));
+    bindHealthEvents(root);
 }
 
 function rerenderElderlyKeepingScroll() {
@@ -965,6 +987,11 @@ function rerenderElderlyKeepingScroll() {
 }
 
 async function toggleTask(type, rawId) {
+    if (type === 'medication') {
+        const med = App.data.medications.find(m => m.id === Number(rawId));
+        if (med) setMedicationStatus(med, getLog().meds.includes(med.id) ? null : 'taken');
+        return;
+    }
     const log = getLog();
     const listName = { medication: 'meds', exercise: 'exercises', meal: 'meals' }[type];
     const id = type === 'meal' ? rawId : Number(rawId);
@@ -984,8 +1011,7 @@ async function toggleTask(type, rawId) {
     saveToStorage();
     rerenderElderlyKeepingScroll();
 
-    if (type === 'medication') showToast('Remédio tomado! 💊', 'success');
-    else if (type === 'meal') showToast('Bom apetite! 🍽️', 'success');
+    if (type === 'meal') showToast('Bom apetite! 🍽️', 'success');
     else await askExerciseFeedback(id);
 }
 
@@ -1068,7 +1094,8 @@ function renderCaregiver() {
         medication: renderCaregiverMeds,
         exercise: renderCaregiverExercises,
         diet: renderCaregiverDiet,
-        visit: renderCaregiverVisits
+        visit: renderCaregiverVisits,
+        health: renderCaregiverHealth
     };
     const body = document.getElementById('caregiver-body');
     body.innerHTML = (renderers[App.caregiverTab] || renderCaregiverPanel)();
@@ -1090,6 +1117,7 @@ function bindCaregiverEvents(root) {
     const weightBtn = root.querySelector('[data-weight]');
     if (weightBtn) weightBtn.addEventListener('click', editWeight);
     if (App.caregiverTab === 'diet') bindDietEditor(root);
+    bindHealthEvents(root);
 }
 
 function editAttrs(type, id) {
@@ -1107,8 +1135,8 @@ function renderCaregiverPanel() {
 function renderCaregiverAlerts() {
     const alerts = App.data.alerts.filter(a => !a.seen);
     if (!alerts.length) return '';
-    const emoji = { fall: '🚨', dizzy: '😵', mood: '😟' };
-    const title = { fall: 'Queda registrada', dizzy: 'Mal-estar no exercício', mood: 'Humor baixo' };
+    const emoji = { fall: '🚨', dizzy: '😵', mood: '😟', symptom: '🩺', health: '📋' };
+    const title = { fall: 'Queda registrada', dizzy: 'Mal-estar no exercício', mood: 'Humor baixo', symptom: 'Sintoma relatado', health: 'Orientação do profissional' };
     return section('Avisos', alerts.map(a => `
         <div class="alert-card ${a.type === 'mood' ? 'warning' : ''}">
             <span class="alert-emoji">${emoji[a.type] || '⚠️'}</span>
@@ -1125,6 +1153,7 @@ function renderCaregiverToday() {
     const stats = dayStats(new Date());
     const log = getLog();
     const mood = log.mood ? MOODS.find(m => m.value === log.mood) : null;
+    const symptoms = [...new Set([...log.symptoms, ...healthTodaySymptomLabels()])];
 
     const stat = (label, kind, done, total, unit = '') => {
         const pct = total ? Math.min(100, Math.round((done / total) * 100)) : 0;
@@ -1147,9 +1176,10 @@ function renderCaregiverToday() {
             <span class="task-avatar emoji">${mood ? mood.emoji : '❔'}</span>
             <div class="task-info">
                 <div class="task-title">Humor: ${mood ? mood.label : 'ainda não informado'}</div>
-                <div class="task-subtitle">${log.symptoms.length ? 'Sintomas: ' + escapeHtml(log.symptoms.join(', ')) : 'Nenhum sintoma relatado hoje'}</div>
+                <div class="task-subtitle">${symptoms.length ? 'Sintomas: ' + escapeHtml(symptoms.join(', ')) : 'Nenhum sintoma relatado hoje'}</div>
             </div>
-        </div>`);
+        </div>
+        ${caregiverHealthSummary()}`);
 }
 
 function renderCaregiverWeek() {
@@ -1390,7 +1420,17 @@ async function changePassword() {
 }
 
 function clearAllData() {
-    showConfirm('Limpar Dados', 'Todos os remédios, exercícios, registros e configurações serão apagados. Esta ação não pode ser desfeita.', async () => {
+    showConfirm('Limpar Dados', 'Todos os remédios, exercícios, registros, o Diário de Saúde e as configurações serão apagados. Esta ação não pode ser desfeita.', async () => {
+        if (healthAvailable()) {
+            try {
+                hcall('wipe');
+            } catch (e) {
+                showToast(e.message, 'error');
+                return;
+            }
+            Health.profile = null;
+            Health.report = null;
+        }
         localStorage.removeItem(STORAGE_SETTINGS);
         localStorage.removeItem(STORAGE_DATA);
         App.settings = { ...DEFAULT_SETTINGS };
@@ -1493,8 +1533,9 @@ function finishEdit(message) {
     goBack();
 }
 
-function confirmDelete(title, message, collection, id, toast) {
+function confirmDelete(title, message, collection, id, toast, onDelete) {
     showConfirm(title, message, () => {
+        if (onDelete) onDelete();
         App.data[collection] = App.data[collection].filter(item => item.id !== id);
         finishEdit(toast);
     }, 'Excluir');
@@ -1543,10 +1584,20 @@ function renderMedicationForm(container, id) {
                 <textarea class="form-input form-textarea" id="med-instructions" placeholder="Ex: Tomar com água, depois do café">${med ? escapeHtml(med.instructions || '') : ''}</textarea>
                 <p class="form-hint">Vitamina D e cálcio também podem ser cadastrados aqui, se prescritos pelo médico.</p>
             </div>
+            ${medicationReminderField(med)}
             ${formActions(id, 'Adicionar remédio', 'Excluir remédio')}
         </form>
     `;
-    bindDelete(container, () => confirmDelete('Excluir remédio', 'Tem certeza que deseja excluir este remédio?', 'medications', id, 'Remédio excluído'));
+    const reminderToggle = document.getElementById('med-reminder');
+    if (reminderToggle) {
+        reminderToggle.addEventListener('click', () => {
+            const on = !reminderToggle.classList.contains('active');
+            reminderToggle.classList.toggle('active', on);
+            reminderToggle.setAttribute('aria-checked', on);
+        });
+    }
+    bindDelete(container, () => confirmDelete('Excluir remédio', 'Tem certeza que deseja excluir este remédio? O histórico de doses continua no Diário de Saúde.', 'medications', id, 'Remédio excluído',
+        () => syncMedicationReminder({ id }, false)));
     document.getElementById('form-medication').addEventListener('submit', e => {
         e.preventDefault();
         const item = {
@@ -1558,7 +1609,10 @@ function renderMedicationForm(container, id) {
             instructions: val('med-instructions')
         };
         if (!item.name || !item.dosage) return showToast('Preencha nome e dosagem', 'error');
+        const wantsReminder = !!(reminderToggle && reminderToggle.classList.contains('active'));
+        if (wantsReminder && !item.time) return showToast('Informe o horário para receber o aviso', 'error');
         upsert('medications', item);
+        if (reminderToggle) syncMedicationReminder(item, wantsReminder);
         finishEdit(id ? 'Remédio atualizado!' : 'Remédio adicionado!');
     });
 }
@@ -1658,15 +1712,20 @@ function renderVisitForm(container, id) {
                 <label class="form-label" for="visit-description">Descrição</label>
                 <textarea class="form-input form-textarea" id="visit-description" placeholder="Ex: Consulta com geriatra, visita da filha">${visit ? escapeHtml(visit.description || '') : ''}</textarea>
             </div>
+            ${visitReminderField(visit)}
             ${formActions(id, 'Agendar visita', 'Cancelar visita')}
         </form>
     `;
-    bindDelete(container, () => confirmDelete('Cancelar visita', 'Tem certeza que deseja cancelar esta visita?', 'visits', id, 'Visita cancelada'));
+    bindDelete(container, () => confirmDelete('Cancelar visita', 'Tem certeza que deseja cancelar esta visita?', 'visits', id, 'Visita cancelada',
+        () => syncVisitReminder({ id }, '')));
     document.getElementById('form-visit').addEventListener('submit', e => {
         e.preventDefault();
         const item = { id: id || Date.now(), date: val('visit-date'), time: val('visit-time'), description: val('visit-description') };
         if (!item.date) return showToast('Escolha uma data', 'error');
+        const reminderSelect = document.getElementById('visit-reminder');
+        if (reminderSelect && reminderSelect.value !== '' && !item.time) return showToast('Informe o horário para receber o lembrete', 'error');
         upsert('visits', item);
+        if (reminderSelect) syncVisitReminder(item, reminderSelect.value);
         finishEdit(id ? 'Visita atualizada!' : 'Visita agendada!');
     });
 }
